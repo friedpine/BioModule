@@ -6,6 +6,8 @@ import infra01_pos2info as in1
 import MySQLdb as mb
 import d00_sample as d00
 
+def TEST():
+	print "TEST"
 
 def read_VCF_file(cursor1,SAMPLE_IN,type,DB_NAME,tablename,limit,counts,samples):
 	conn=mb.connect(host="localhost",user="root",passwd="123456",db=DB_NAME)
@@ -21,6 +23,7 @@ def read_VCF_file(cursor1,SAMPLE_IN,type,DB_NAME,tablename,limit,counts,samples)
 	  `Alt` varchar(30) NOT NULL DEFAULT '',
 	  `Qual` float DEFAULT NULL,
 	  `DP` int(11) DEFAULT NULL,
+	  `DP_alt` int(11) DEFAULT NULL,
 	  `FQ` float DEFAULT NULL,
 	  `AF1` float DEFAULT NULL,
 	  `AC1` float DEFAULT NULL,
@@ -50,7 +53,11 @@ def read_VCF_file(cursor1,SAMPLE_IN,type,DB_NAME,tablename,limit,counts,samples)
 		if len(t[4])>limit:
 			t[4]=t[4][0:limit]
 			continue
-		value = (t[0],t[1],t[3],t[4],t[5],info['DP'],info['FQ'],info['AF1'],info['AC1'])
+		if "DP4" in info:
+			DP4 = sum([int(i) for i in re.split(",",info['DP4'])][2:4])		
+		else:
+			DP4=0
+		value = (t[0],t[1],t[3],t[4],t[5],info['DP'],DP4,info['FQ'],info['AF1'],info['AC1'])
 		for i in range(counts):
 			value += tuple(re.split(':|,',t[9+i]))
 		if len(value)!=9+counts*6:
