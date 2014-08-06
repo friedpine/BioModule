@@ -65,8 +65,9 @@ def INFO_writer(cursor,conn,samples,template,infile,outfile):
 	cmds = []
 	for sample in samples:
 		file_in = d00.get_sample_file(cursor,sample,infile)
-		cmd=template.replace("##","\"")
+		cmd=template.replace("#E","\"")
 		cmd=cmd.replace("#0",file_in)
+		cmd=cmd.replace("#S",sample)
 		cmds.append(cmd)
 	return cmds
 def UNMAPPED_BWA_Pair_unmapped(cursor,conn,samples,bamtype,folder,rec):

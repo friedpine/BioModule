@@ -1,9 +1,8 @@
 from __future__ import division
-from scipy.stats.stats import pearsonr
 import re
 import os
 import matplotlib
-matplotlib.use('Cairo')
+#matplotlib.use('Cairo')
 import matplotlib.pyplot as plt
 import subprocess
 import cPickle as pickle
@@ -200,7 +199,6 @@ class coverage(dict):
 		plt.title(range_name[i])
 		plt.legend(loc=2)	
 		plt.savefig('f.png.'+record+'.png',dpi=200)
-		plt.savefig('f.eps.'+record+'.eps')
                 plt.clf()
 	def GC_content_build_bulk(self,n,GC_file,bulk_sample):
                 self['GC'] = {}

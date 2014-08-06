@@ -60,11 +60,12 @@ def read_VCF_file(cursor1,SAMPLE_IN,type,DB_NAME,tablename,limit,counts,samples)
 		value = (t[0],t[1],t[3],t[4],t[5],info['DP'],DP4,info['FQ'],info['AF1'],info['AC1'])
 		for i in range(counts):
 			value += tuple(re.split(':|,',t[9+i]))
-		if len(value)!=9+counts*6:
+		if len(value)!=10+counts*6:
 			a = 10
 		else:
 			values.append(value)
-	cmd = "insert into "+tablename+" values(%s"+",%s"*(8+counts*6)+")"
+	cmd = "insert into "+tablename+" values(%s"+",%s"*(9+counts*6)+")"
+	print len(values)
 	cursor.executemany(cmd,values);
 	conn.commit()
 	cursor.close()
