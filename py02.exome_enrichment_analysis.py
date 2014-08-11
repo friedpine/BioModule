@@ -7,9 +7,15 @@ import pysam
 conn=mb.connect(host="localhost",user="root",passwd="123456",db='lihang')
 cursor = conn.cursor()
 
+conn2=mb.connect(host="162.105.59.51",port=8999,user="root",passwd="123456",db='hg19')
+cursor2 = conn2.cursor()
+
 #GET_RANDOM_1K_EXONS
-cursor.execute("SELECT chr,left_pos,right_pos FROM hg19_ensembl.exons WHERE id%100=1 and length(chr)<6")
+#cursor.execute("SELECT chr,left_pos,right_pos FROM hg19_ensembl.exons WHERE id%100=1 and length(chr)<6")
+#exons = cursor.fetchall()
+cursor2.execute("SELECT chr,left,right FROM hg19.SureSelect_exome WHERE id%100=1 and length(chr)<6")
 exons = cursor.fetchall()
+
 
 #GET_COUNTS_OF_READS
 samples = ['PC1_M','PC2_M','PC1_e','PC2_e','PT1_M','PT2_M','PT1_e','PT2_e']
