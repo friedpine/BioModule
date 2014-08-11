@@ -14,7 +14,7 @@ cursor2 = conn2.cursor()
 #cursor.execute("SELECT chr,left_pos,right_pos FROM hg19_ensembl.exons WHERE id%100=1 and length(chr)<6")
 #exons = cursor.fetchall()
 cursor2.execute("SELECT chr,`left`,`right` FROM hg19.SureSelect_exome WHERE id%100=1 AND LENGTH(chr)<6")
-exons = cursor.fetchall()
+exons = cursor2.fetchall()
 
 
 #GET_COUNTS_OF_READS
