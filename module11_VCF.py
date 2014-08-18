@@ -5,6 +5,7 @@ import cPickle as pickle
 import infra01_pos2info as in1
 import MySQLdb as mb
 import d00_sample as d00
+import module00_samples as m00
 
 def TEST():
 	print "TEST"
@@ -119,66 +120,8 @@ def read_VCF_file_single(cursor,conn,DB_NAME,tablename,samples,type):
 		conn.commit()
 	cursor.close()
 	conn.close()
-class SNP(dict):
-	def __init__(self):
-		print "SNP class welcomes you!"
-	# def read_VCF_file(self,path,sample_names):
-	# 	self['samples'] = sample_names
-	# 	file = open(path)
-	# 	values = []
-	# 	for line in file:
-	# 		if re.search('#',line):
-	# 			continue
-	# 		t = re.split('\s*',line)
-	# 		info = re.split(t[7]
-	def find_good_quality_SNP_pos(self,group,names,goodsize,QUAL_off,GQ_off,rec):
-		self['groupnames'] = names
-		self[rec] = {}
-		indexs = []
-		for i in range(len(names)):
-			temp = []
-			for j in range(len(group)):
-				if group[j] == i:
-					temp.append(j)
-			indexs.append(temp)	
-		for chr in self['chrs']:
-			for pos in self[chr]:
-				if self[chr][pos]['QUAL'] < QUAL_off:
-					continue 
-				self[chr][pos]['group_GT'] = ['NA','NA']
-				for groupid,i in enumerate(indexs):
-					types = []
-					number = 0
-					for j in i:
-						if self[chr][pos]['GQ'][j] >= GQ_off:
-							types.append(self[chr][pos]['GT'][j])
-					counts = dict([(i, types.count(i)) for i in types])
-					GroupType = 'NA'
-					for gt in counts:
-						if counts[gt] >= goodsize[groupid]:
-							GroupType = gt
-					self[chr][pos]['group_GT'][groupid] = GroupType
-				if 'NA' not in self[chr][pos]['group_GT']:
-					counts = dict([(i, types.count(i)) for i in self[chr][pos]['group_GT']])
-					if len(counts) == 2:
-						if chr not in self[rec]:
-							self[rec][chr] = {}
-						self[rec][chr][pos] = {}
-						self[rec][chr][pos]['GT'] = self[chr][pos]['group_GT']
-						self[rec][chr][pos]['ref'] = self[chr][pos]['ref']
-						self[rec][chr][pos]['alt'] = self[chr][pos]['alt']
-	def get_pos_infos(self,rec,db1,db2):
-		poses = copy.deepcopy(self[rec])
-		in1.get_infos(db1,db2,poses)
-		self[rec] = poses
-	def select_target_genes(self,rec,type,genetypes,file):
-		outfile = open(file,'w')
-		for chr in self[rec]:
-			for pos in self[rec][chr]:
-				temp = self[rec][chr][pos]
-				if self[rec][chr][pos][type]['raw'] == []:
-					continue
-				if self[rec][chr][pos]['GT'] not in genetypes:
-					continue
-				print >>outfile,chr,pos,temp['ref'],temp['alt'],temp[type]['genes'][0],temp[type]['transc'][0]
-		outfile.close()	
+def CELLS_GROUPS_VCF(cursor,conn,samples,group_name,file_type,outdir,cmd_file):
+	m00.FILES_GROUPER(cursor,conn,samples,group_name,file_type,' ')
+	w1 = m00.COMMAND_generator(cursor,conn,[group_name],"samtools mpileup -Duf /data/Analysis/fanxiaoying/database/hg19/00.genome/genome.fa #0 | /data/Analysis/fanxiaoying/software/samtools-0.1.19/bcftools/bcftools view -bvcg -> #1",[file_type],outdir,'.bcf','SNV')
+	w2 = m00.COMMAND_generator(cursor,conn,[group_name],"/data/Analysis/fanxiaoying/software/samtools-0.1.19/bcftools/bcftools view #0 | perl /data/Analysis/fanxiaoying/project/project01_polyA-RNAseq/modules/scripts/vcfutils.pl varFilter -d 5 >#1",['SNV'],outdir,'.vcf','SNV_d5')
+	m00.w(w1+w2,cmd_file)
