@@ -64,7 +64,7 @@ def pair_merge_by_overlap(seq1,seq2,qua1,qua2):
     if pos+len(seq2)>=len(seq1):
       return 1,seq1+seq2[len(seq1)-pos:len(seq2)],qua1+qua2[len(seq1)-pos:len(seq2)]
     else:
-      return 1,seq1[pos+len(seq2)],qua2[pos+len(seq2)]
+      return 1,seq1[0:pos+len(seq2)],qua1[0:pos+len(seq2)]
   elif pos>-1000:
     return 1,seq1[0:len(seq1)+pos],qua1[0:len(seq1)+pos]
   else:
