@@ -113,7 +113,7 @@ while 1:
       print >>out,head1,"\n",seq,"\n","+",qua
     else:
       others += 1
-print total,adaptor,overlap, 
+print total,adaptor,overlap,otheres
   
   
   
