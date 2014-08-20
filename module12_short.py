@@ -1,4 +1,5 @@
 import re
+import gzip
 
 def remove_low_quantity(seq,qua):
   pos = re.search("#*?$",qua).start()
@@ -52,7 +53,7 @@ def pair_merge_by_overlap(seq1,seq2,qua1,qua2):
   qua2 = qua2[::-1]
   poses = range(0,len(seq2)-12,6)
   segs = [seq2[i:12+i] for i in poses]
-  overlap_pos = [-1]
+  overlap_pos = [-1000]
   for id,seg in enumerate(segs):
     try:
       overlap_pos.append(re.search(seg,seq1).start()-poses[id])
@@ -61,6 +62,8 @@ def pair_merge_by_overlap(seq1,seq2,qua1,qua2):
   pos = max(overlap_pos)
   if pos >= 0:
     return 1,seq1+seq2[len(seq1)-pos:len(seq2)],qua1+qua2[len(seq1)-pos:len(seq2)]
+  elif pos>-1000:
+    return 1,seq1[0:len(seq1)+pos],qua1[0:len(seq1)+pos]
   else:
     return 0,seq1,seq2
   
@@ -75,7 +78,45 @@ seq2 = "AAAATCAAACTTATTTTATACTGACCATCTGACGTTCCAAAAATATTACTTAATAATGATTTCATACCATCC
 #pair_merge_by_overlap(seq1,seq2,qua1,qua2)
 #pairs_merge_by_adaptor(seq1,seq2,qua1,qua2)
   
+#fq1 = gzip.open('R1.fq.gz','rb')
+#fq2 = gzip.open('R1.fq.gz','rb')
 
+fq1 = open("TEST_R1.fq")
+fq2 = open("TETS_R2.fq")
+out = open("merged.txt","wb")
+
+total = 0
+adaptor = 0
+overlap = 0
+others = 0
+
+while 1:
+  head1 = fq1.read()
+  if head1 == '':
+    break
+  head2 = fq2.read()
+  seq1 = fq1.read()
+  seq2 = fq2.read()
+  tmp = fq1.read()
+  tmp = fq2.read()
+  qua1 = fq1.read()
+  qua2 = fq2.read()  
+  total += 1
+  state,seq,qua = pairs_merge_by_adaptor(seq1,seq2,qua1,qua2)
+  if state == 1:
+    adaptor += 1
+    print >>out,head1,"\n",seq,"\n","+",qua
+  else:
+    state,seq,qua = pair_merge_by_overlap(seq1,seq2,qua1,qua2)
+    if state == 1:
+      overlap += 1
+      print >>out,head1,"\n",seq,"\n","+",qua
+    else:
+      others += 1
+print total,adaptor,overlap, 
+  
+  
+  
 
 
   
