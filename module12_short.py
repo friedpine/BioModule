@@ -6,7 +6,11 @@ def remove_low_quantity(seq,qua):
   
 def reverse_complementary(seq):
   comp = {"A":"T","T":"A","C":"G","G":"C","N":"N"}
-
+  RC_seq = ""
+  for i in seq:
+    RC_seq += comp[i]
+  return RC_seq[::-1]
+  
 def adaptor_pair1_pos(seq):
   pos = [-1]
   try:
@@ -27,7 +31,26 @@ def adaptor_pair2_pos(seq):
     tmp = 1
   return pos
 
+def seq_overlaption(seq1,seq2,qua1,qua2):
+  seq1,qua1 = remove_low_quantity(seq1,qua1)
+  seq2,qua2 = remove_low_quantity(seq2,qua2)  
+  seq2 = reverse_complementary(seq2)
+  qua2 = qua2[::-1]
+  poses = range(0,len(seq2)-12,6)
+  segs = [seq2[i:12+i] for i in poses]
+  overlap_pos = [-1]
+  for id,seg in enumerate(segs):
+    try:
+      overlap_pos.append(re.search(seg,seq1).start()-poses[id])
+    except:
+      tmp = 1
+  pos = max(overlap_pos)
+  if pos >= 0:
+    return 1,seq1+seq2[len(seq1)-pos:len(seq2)],qua1+qua2[len(seq1)-pos:len(seq2)]
+  else:
+    return 0,seq1,seq2
 
+seq_overlaption(seq1,seq2,qua1,qua2)    
 
 def pairs_merge_by_adaptor(seq1,seq2,qua1,qua2):
   seq1,qua1 = remove_low_quantity(seq1,qua1)
@@ -50,6 +73,9 @@ qua2 = "@@@?DDADFHFFF@@@DAG@DHIID@A>EEEDBACBBBB;9C?C@>9@<<BB5<6?3@CCC@B2?B@BCB@?
 
 seq1 = "CAAATCATATTATAGGCATGTGTGTGCAGTTGGTGGTGTATTAAATTTACTCACTATGTGGGCTGCAAACTTAGTAGGATTTGCTGTTGGGTTGGATGGTA"
 seq2 = "AAAATCAAACTTATTTTATACTGACCATCTGACGTTCCAAAAATATTACTTAATAATGATTTCATACCATCCAACCCAACAGCAAATCCTACTAAGTTTGC"
+
+seq_overlaption(seq1,seq2,qua1,qua2)
+
 pairs_merge_by_adaptor(seq1,seq2,qua1,qua2)
   
 
