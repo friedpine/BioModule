@@ -81,8 +81,8 @@ seq2 = "AAAATCAAACTTATTTTATACTGACCATCTGACGTTCCAAAAATATTACTTAATAATGATTTCATACCATCC
 #fq1 = gzip.open('R1.fq.gz','rb')
 #fq2 = gzip.open('R1.fq.gz','rb')
 
-fq1 = open("TEST_R1.fq")
-fq2 = open("TETS_R2.fq")
+fq1 = open("R1.fq")
+fq2 = open("R2.fq")
 out = open("merged.txt","wb")
 
 total = 0
@@ -91,26 +91,26 @@ overlap = 0
 others = 0
 
 while 1:
-  head1 = fq1.read()
+  head1 = fq1.readline()
+  head2 = fq2.readline()
   if head1 == '':
     break
-  head2 = fq2.read()
-  seq1 = fq1.read()
-  seq2 = fq2.read()
-  tmp = fq1.read()
-  tmp = fq2.read()
-  qua1 = fq1.read()
-  qua2 = fq2.read()  
+  seq1 = fq1.readline()
+  seq2 = fq2.readline()
+  tmp = fq1.readline()
+  tmp = fq2.readline()
+  qua1 = fq1.readline()
+  qua2 = fq2.readline()  
   total += 1
   state,seq,qua = pairs_merge_by_adaptor(seq1,seq2,qua1,qua2)
   if state == 1:
     adaptor += 1
-    print >>out,head1,"\n",seq,"\n","+",qua
+    print >>out,head1,seq,"\n","+","\n",qua
   else:
     state,seq,qua = pair_merge_by_overlap(seq1,seq2,qua1,qua2)
     if state == 1:
       overlap += 1
-      print >>out,head1,"\n",seq,"\n","+",qua
+      print >>out,head1,seq,"\n","+","\n",qua
     else:
       others += 1
 print total,adaptor,overlap,others
