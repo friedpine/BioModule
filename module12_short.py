@@ -61,7 +61,10 @@ def pair_merge_by_overlap(seq1,seq2,qua1,qua2):
       tmp = 1
   pos = max(overlap_pos)
   if pos >= 0:
-    return 1,seq1+seq2[len(seq1)-pos:len(seq2)],qua1+qua2[len(seq1)-pos:len(seq2)]
+    if pos+len(seq2)>=len(seq1):
+      return 1,seq1+seq2[len(seq1)-pos:len(seq2)],qua1+qua2[len(seq1)-pos:len(seq2)]
+    else:
+      return 1,seq1[pos+len(seq2)],qua2[pos+len(seq2)]
   elif pos>-1000:
     return 1,seq1[0:len(seq1)+pos],qua1[0:len(seq1)+pos]
   else:
@@ -81,8 +84,8 @@ seq2 = "AAAATCAAACTTATTTTATACTGACCATCTGACGTTCCAAAAATATTACTTAATAATGATTTCATACCATCC
 #fq1 = gzip.open('R1.fq.gz','rb')
 #fq2 = gzip.open('R1.fq.gz','rb')
 
-fq1 = open("R1.fq")
-fq2 = open("R2.fq")
+#fq1 = open("R1.fq")
+#fq2 = open("R2.fq")
 out = open("merged.txt","wb")
 
 total = 0
@@ -114,8 +117,6 @@ while 1:
     else:
       others += 1
 print total,adaptor,overlap,others
-  
-  
   
 
 
