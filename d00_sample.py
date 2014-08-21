@@ -17,6 +17,7 @@ def cp_move_files(pathes,operation,rec):
 	if operation == 'mv':
 		for i in pathes:
 			subprocess.call("mv "+i[0]+" "+i[1],shell='True')
+
 def cufflinks_command(dbname,samples,bamrec,outrec,outdirrec,gtf):
 	conn=mb.connect(host="localhost",user="root",passwd="123456",db=dbname)
 	cursor = conn.cursor()
@@ -42,14 +43,19 @@ def pair_end_insert_size(dbname,samples,bamrec,outdir,outrec):
 		conn.commit()
 		out.append('samtools view -f 2 '+bam+" | awk '{print $9}' > "+outdir+'/insert_size_'+sample+'.txt')
 	return out
+	
 def get_sample_file(cursor,sample,type):
 	cursor.execute("select path from files where sample = %s and type = %s",[sample,type])
 	return cursor.fetchall()[0][0]
+	
 def get_sample_info(cursor,sample,type):
 	cursor.execute("select "+type+" from samples where sample = %s",[sample])
 	return cursor.fetchall()[0][0]
-def insert_sample_file(cursor,sample,type,path):
+	
+def insert_sample_file(cursor,conn,sample,type,path):
 	cursor.execute("insert into files values(%s,%s,%s,NULL)",[sample,type,path])
+	conn.commit()
+
 def table_2_dict(cursor,tablename,columes):
 	gt = {}
 	cursor.execute("select %s,%s from %s" %(columes[0],columes[1],tablename))
@@ -57,6 +63,7 @@ def table_2_dict(cursor,tablename,columes):
 	for i in r0:
 		gt[i[0]] = i[1]
 	return gt
+
 def run_pipeline(cmdname,n):
 	import subprocess,time
 	handle = []
