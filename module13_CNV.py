@@ -10,9 +10,9 @@ bamfile="/datc/fanxiaoying/project/project04_LH/01.pipeline/BAMbam_bwa_genome_M1
 tablename = "lihang.CNV_M10_1M"
 binsize = 1000000
 
-def GET_BINNED_COUNTS_ALONG_GENOME(cursor,conn,bamfile,binsize,chrom_size,tablename)
+def GET_BINNED_COUNTS_ALONG_GENOME(cursor,conn,bamfile,binsize,chrom_size,tablename):
   sql_table = "CREATE TABLE "+tablename+" (chr varchar(10),bin_id int, counts int)"	
-  cursor.execute("select chr,`length` from "+chrom_size")
+  cursor.execute("select chr,`length` from "+chrom_size)
   results = cursor.fetchall()
   samfile = pysam.Samfile(bamfile, "rb")
   counts = []
@@ -23,7 +23,7 @@ def GET_BINNED_COUNTS_ALONG_GENOME(cursor,conn,bamfile,binsize,chrom_size,tablen
     cursor.execute(sql_table)
   except:
     print "EXISTS"
-	cursor.executemany("insert ignore into "+tablename+" values(%s,%s,%s) """,counts)
-	conn.commit()
+  cursor.executemany("insert ignore into "+tablename+" values(%s,%s,%s) """,counts)
+  conn.commit()
   
       

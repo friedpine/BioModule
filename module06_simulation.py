@@ -1,13 +1,9 @@
 from __future__ import division
-from scipy.stats.stats import pearsonr
 import re
 import os
-import matplotlib.pyplot as plt
 import subprocess
-import cPickle as pickle
 import time
 import numpy as np
-import subprocess
 import d00_sample as d00
 
 def capture_coeff_molecular_counts(n,counts,coeff,figname):
@@ -28,7 +24,7 @@ def capture_coeff_molecular_counts(n,counts,coeff,figname):
 	plt.savefig('f.'+figname+str(coeff)+'.png')
 	plt.clf()
 
-def estimate_insertion_sizes(cursor,conn,dbname,samples,readcounts,fq1_types,fq2_types,outdir,file):
+def fq_samplings(cursor,conn,dbname,samples,readcounts,fq1_types,fq2_types,outdir,file):
 	f = open(file,"wb")
 	for id,sample in enumerate(samples):
 		fq1 = ""
