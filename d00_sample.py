@@ -1,9 +1,15 @@
 import MySQLdb as mb
+
+def get_path2(cursor,sample,type):
+	cursor.execute("select path from files where sample = %s and type = %s",([sample,type]))
+	return cursor.fetchall()[0][0]
+
 def get_path(dbname,sample,type):
 	conn=mb.connect(host="localhost",user="root",passwd="123456",db=dbname)
 	cursor = conn.cursor()
 	cursor.execute("select path from files where sample = %s and type = %s",([sample,type]))
 	return cursor.fetchall()[0][0]
+	
 def cp_move_files(pathes,operation,rec):
 	if operation == 'cp':
 		for i in pathes:
