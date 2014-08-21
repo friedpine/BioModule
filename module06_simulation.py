@@ -28,7 +28,7 @@ def capture_coeff_molecular_counts(n,counts,coeff,figname):
 	plt.savefig('f.'+figname+str(coeff)+'.png')
 	plt.clf()
 
-def estimate_insertion_sizes(cursor,conn,dbname,samples,readcounts,fq1_types,fq2_types,outdir):
+def estimate_insertion_sizes(cursor,conn,dbname,samples,readcounts,fq1_types,fq2_types,outdir,file):
 	f = open(file,"wb")
 	for id,sample in enumerate(samples):
 		fq1 = ""
