@@ -7,3 +7,6 @@ def CREATE_TABLE(cursor,tablename,colnames,types):
     cursor.execute(sql)
   except:
     "EXISTS"
+
+def GET_DATA_FROM_DB(cursor,conn,sql):
+  return 1
