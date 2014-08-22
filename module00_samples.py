@@ -100,6 +100,7 @@ def MAPPED_SINGLE(cursor,conn,samples,bamtype,folder,rec):
 		cmds.append(cmd)
 	conn.commit()
 	return cmds
+	
 def BOWTIE_alignment(cursor,conn,samples,species,ref,ins,outdir,usage,rec):
 	cmds = []
 	for sample in samples:
@@ -113,6 +114,12 @@ def BOWTIE_alignment(cursor,conn,samples,species,ref,ins,outdir,usage,rec):
 		if not os.path.exists(path):
 			cmds.append(cmd)
 	return cmds
+	
+def BOWTIE_SINGLE(cursor,conn,samples,species,ref,ins,outdir,usage,rec):
+	cmds = []
+	return cmds
+
+	
 def BWA_SINGLE(cursor,conn,specise,ref,samples,intype,folder,rec):
 	cmds = []
 	for sample in samples:
