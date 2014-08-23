@@ -1,4 +1,5 @@
 import MySQLdb as mb
+import re
 
 def get_path2(cursor,sample,type):
 	cursor.execute("select path from files where sample = %s and type = %s",([sample,type]))
@@ -51,6 +52,14 @@ def pairend_insertion_size_estimation(cursor,conn,samples,bamrec,outdir,outname,
 		conn.commit()
 		sample_new_name = samplename_transformer(cursor,conn,'sample',outname,sample)
 		out.append('samtools view -f 2 '+bam+" | awk '{print $9}' > "+outdir+'/insert_size_'+sample_new_name+'.txt')
+		if os.path.exists(outfile):
+			f = open(outfile)
+			f1 = f.read()
+			f2 = re.split('\n',f1)
+			import numpy
+			mean = np.mean([abs(int(i)) for i in f2[1:len(f2)-10]])
+			std = np.std([abs(int(i)) for i in f2[1:len(f2)-10]])    
+			print sample_new_name,mean,std
 	return out
 	
 def get_sample_file(cursor,sample,type):
