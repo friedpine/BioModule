@@ -47,7 +47,7 @@ def pairend_insertion_size_estimation(cursor,conn,samples,bamrec,outdir,outname,
 		cursor.execute("select path from files where sample = %s and type = %s",([sample,bamrec]))
 		bam = cursor.fetchall()[0][0]
 		outfile = outdir+'/insert_size_'+sample+'.txt'
-		cursor.execute("insert ignore into files values(%s,%s,%s,%s)",([sample,outrec,outfile,8888]))
+		cursor.execute("insert ignore into files (sample,type,path)values(%s,%s,%s)",([sample,outrec,outfile]))
 		conn.commit()
 		sample_new_name = samplename_transformer(cursor,conn,'sample',outname,sample)
 		out.append('samtools view -f 2 '+bam+" | awk '{print $9}' > "+outdir+'/insert_size_'+sample_new_name+'.txt')
