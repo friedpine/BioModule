@@ -2,6 +2,7 @@ import pysam
 import os, sys, re
 import MySQLdb as mb
 import infra05_MySQLDB as in05
+import d00_sample as d00
 
 conn=mb.connect(host="localhost",user="root",passwd="123456",db='lihang')
 cursor = conn.cursor()
@@ -29,7 +30,11 @@ def GET_BINNED_COUNTS_ALONG_GENOME(cursor,conn,bamfile,binsize,chrom_size,tablen
   
       
 def GET_BINNED_COUNTS_ALONG_GENOME_Multiple(cursor,conn,samples,bamfile,binsize,chrom_size,tablename):
-  in05.CREATE_TABLE(cursor,tablename,['chr','bin_id']+colnames,['varchar(20)','int']+['int']*len(samples))
+  print tablename,
+  colnames = ['chr','bin_id']+samples
+  types = ['varchar(20)','int']+['int']*len(samples)
+  print colnames,types
+  in05.CREATE_TABLE(cursor,tablename,colnames,types)
   cursor.execute("select chr,`length` from "+chrom_size)
   results = cursor.fetchall()
   
@@ -44,16 +49,9 @@ def GET_BINNED_COUNTS_ALONG_GENOME_Multiple(cursor,conn,samples,bamfile,binsize,
       bin_info = [chr[0],int(pos/binsize)]
       for samfile in samfiles:
         bin_info.append(samfile.count(chr[0],pos,min(pos+binsize,int(chr[1]))))
-      counts.append(counts)
-  return counts[1]
-    
-      
-      
-      
       counts.append(bin_info)
-  try:
-    cursor.execute(sql_table)
-  except:
-    print "EXISTS"
-  cursor.executemany("insert ignore into "+tablename+" values(%s,%s,%s) """,counts)
+  up_cmd = "insert ignore into "+tablename+" values("+" %s,"*len(colnames)
+  up_cmd = up_cmd[0:len(up_cmd)-1]+")"
+  print up_cmd
+  cursor.executemany(up_cmd,counts)
   conn.commit()

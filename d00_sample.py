@@ -53,7 +53,7 @@ def get_sample_info(cursor,sample,type):
 	return cursor.fetchall()[0][0]
 	
 def insert_sample_file(cursor,conn,sample,type,path):
-	cursor.execute("insert into files values(%s,%s,%s,NULL)",[sample,type,path])
+	cursor.execute("insert ignore into files (sample,type,path,state)values(%s,%s,%s,NULL)",[sample,type,path])
 	conn.commit()
 
 def table_2_dict(cursor,tablename,columes):

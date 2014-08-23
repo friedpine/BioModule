@@ -42,8 +42,8 @@ def fq_samplings(cursor,conn,dbname,samples,readcounts,fq1_types,fq2_types,outdi
 			tmp_fq2 = outdir+"/"+sample+"_2.fq"
 			print >>f, "less "+fq1+" | head -n "+str(readcounts*4)+" >"+tmp_fq1
 			print >>f, "less "+fq2+" | head -n "+str(readcounts*4)+" >"+tmp_fq2
-			d00.insert_sample_file(cursor,conn,sample,fq1+"_"+str(readcounts),tmp_fq1)
-			d00.insert_sample_file(cursor,conn,sample,fq2+"_"+str(readcounts),tmp_fq2)
+			d00.insert_sample_file(cursor,conn,sample,"fq1_"+str(readcounts),tmp_fq1)
+			d00.insert_sample_file(cursor,conn,sample,"fq2_"+str(readcounts),tmp_fq2)
 			
 			
 	
