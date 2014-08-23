@@ -60,6 +60,8 @@ def pairend_insertion_size_estimation(cursor,conn,samples,bamrec,outdir,outname,
 			mean = np.mean([abs(int(i)) for i in f2[1:len(f2)-10]])
 			std = np.std([abs(int(i)) for i in f2[1:len(f2)-10]])    
 			print sample_new_name,mean,std
+		else:
+			print outfile
 	return out
 	
 def get_sample_file(cursor,sample,type):
