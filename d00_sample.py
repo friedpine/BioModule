@@ -41,9 +41,7 @@ def cufflinks_command(dbname,samples,bamrec,outrec,outdirrec,gtf):
 		out.append('/data/Analysis/fanxiaoying/software/cufflinks-2.1.1.Linux_x86_64/cufflinks -p 4 -o '+outdir+' -G '+gtf+' '+bam)
 	return out
 	
-def pairend_insertion_size_estimation(dbname,samples,bamrec,outdir,outname,outrec):
-	conn=mb.connect(host="localhost",user="root",passwd="123456",db=dbname)
-	cursor = conn.cursor()
+def pairend_insertion_size_estimation(cursor,conn,samples,bamrec,outdir,outname,outrec):
 	out = []
 	for sample in samples:
 		cursor.execute("select path from files where sample = %s and type = %s",([sample,bamrec]))
