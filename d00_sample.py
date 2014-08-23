@@ -1,5 +1,5 @@
 import MySQLdb as mb
-import re
+import re,os
 
 def get_path2(cursor,sample,type):
 	cursor.execute("select path from files where sample = %s and type = %s",([sample,type]))
