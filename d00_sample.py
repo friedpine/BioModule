@@ -10,6 +10,15 @@ def get_path(dbname,sample,type):
 	cursor.execute("select path from files where sample = %s and type = %s",([sample,type]))
 	return cursor.fetchall()[0][0]
 	
+def samplename_transformer(cursor,conn,in_type,out_type,sample_name):
+	try:
+		cursor.execute("select "+out_type+" from samples where "+in_type+" = %s",([sample_name]))
+		name = cursor.fetchall()[0][0]
+	except:
+		print "NO",out_type,"for",in_type,sample_name
+		name = "NA_"+sample_name
+	return name
+	
 def cp_move_files(pathes,operation,rec):
 	if operation == 'cp':
 		for i in pathes:
@@ -31,7 +40,8 @@ def cufflinks_command(dbname,samples,bamrec,outrec,outdirrec,gtf):
 		conn.commit()
 		out.append('/data/Analysis/fanxiaoying/software/cufflinks-2.1.1.Linux_x86_64/cufflinks -p 4 -o '+outdir+' -G '+gtf+' '+bam)
 	return out
-def pair_end_insert_size(dbname,samples,bamrec,outdir,outrec):
+	
+def pairend_insertion_size_estimation(dbname,samples,bamrec,outdir,outname,outrec):
 	conn=mb.connect(host="localhost",user="root",passwd="123456",db=dbname)
 	cursor = conn.cursor()
 	out = []
@@ -41,7 +51,8 @@ def pair_end_insert_size(dbname,samples,bamrec,outdir,outrec):
 		outfile = outdir+'/insert_size_'+sample+'.txt'
 		cursor.execute("insert ignore into files values(%s,%s,%s,%s)",([sample,outrec,outfile,8888]))
 		conn.commit()
-		out.append('samtools view -f 2 '+bam+" | awk '{print $9}' > "+outdir+'/insert_size_'+sample+'.txt')
+		sample_new_name = samplename_transformer(cursor,conn,'sample',outname,sample)
+		out.append('samtools view -f 2 '+bam+" | awk '{print $9}' > "+outdir+'/insert_size_'+sample_new_name+'.txt')
 	return out
 	
 def get_sample_file(cursor,sample,type):
