@@ -2,68 +2,35 @@ from __future__ import division
 import re
 import os
 import matplotlib
-#matplotlib.use('Cairo')
+matplotlib.use('Cairo')
 import matplotlib.pyplot as plt
-import subprocess
-import cPickle as pickle
 import time
 import numpy as np
-import subprocess
+import pysam
 
 
-def get_coverage(bamfile,ID,length):
-	cmd = "samtools view -F 4 "+bamfile+" "+ID
-	p1 = subprocess.Popen(cmd,shell = True,stdout=subprocess.PIPE)
-	depth = [0]*length
-	for line in p1.stdout:
-		array = str.split(line)
-		pos = int(array[3])
-		info = re.findall(r'(\d+)(\D+)',array[5])
-		for i in range(0,len(re.findall(r'(\d+)(\D+)',array[5]))):
-			A = int(info[i][0])
-			B = info[i][1]
-			if B == 'M':
-				for j in range(pos-1,pos+A-1):
-					try:
-						depth[j] += 1
-					except:
-						HEHE = 'Hehe'
-				pos += A
-			elif B == "I":
-				pos += 0
-			else:
-				pos += A
-	return depth
-class gene_coverage_depth(dict):
-	def __init__(self):
-                self['coverage'] = {}
-	def get_gene_coverage(self,geneclass,gene,db1,db2,samples):
-		transcs = []
-		all_exon_pos = []
-		self['coverage']['merge_exons'] = 'AAAA'
-		merge_exon_pos = []
-		if gene not in db1[geneclass]['g']:
-			print "GENE NOT EXISTS IN DB",gene
-			return 0
-		for i in db1[geneclass]['g'][gene]['transcript']:
-			transcs.append(i)
-			for j in range(0,int(len(db2['transc_info'][i]['exons_pos'])/2)):
-				exon_pos = [db2['transc_info'][i]['exons_pos'][2*j],db2['transc_info'][i]['exons_pos'][2*j+1]]
-				if exon_pos not in all_exon_pos:
-					all_exon_pos.append(exon_pos)
-		for i in range(0,len(all_exon_pos)):
-			for j in range(i,len(all_exon_pos)):
-				if (all_exon_pos[j][0]>= all_exon_pos[i][0] and all_exon_pos[j][0]<= all_exon_pos[i][1]) or (all_exon_pos[j][1] >= all_exon_pos[i][0] and all_exon_pos[j][1] <= all_exon_pos[i][1]) or (all_exon_pos[i][0]>= all_exon_pos[j][0] and all_exon_pos[i][0]<= all_exon_pos[j][1]):
-					print all_exon_pos[i],all_exon_pos[j],
-					m_left = min(all_exon_pos[j][0],all_exon_pos[i][0])
-					m_right = max(all_exon_pos[j][1],all_exon_pos[i][1])
-					all_exon_pos[j] = [m_left,m_right]
-					print all_exon_pos[j]
-					all_exon_pos[i]	= [0,0]
-		self['coverage']['merge_exons'] = sorted([i for i in all_exon_pos if i!=[0,0]])
-		print self['coverage']['merge_exons'],all_exon_pos
-		for i in all_exon_pos:
-			print i
+def Depth_Data(bamfiles,position):
+	outs = []
+	for samfile in bamfiles:
+		out = []
+		for column in samfile.pileup(position[0],position[1],position[2]):
+			out.append(column.n)
+		outs.append(out)
+	return outs 
+
+def Plot_Depth_Data(samples,depths,filename):
+		plt.figure(figsize=(10, 8), dpi=150)
+		n = len(samples)
+    for i in range(n):
+			ax = plt.subplot(n,1,i+1)
+			ax.bar(range(len(depths[1])),depths[i],label=samples[i])
+			leg = plt.legend(2)
+			leg.draw_frame(False)
+		plt.savefig(filename)
+		plt.clf()
+	
+
+
 class coverage(dict):
 	def initialize(self,database):
 		self['db'] = database
