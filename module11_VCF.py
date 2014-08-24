@@ -120,7 +120,8 @@ def read_VCF_file_single(cursor,conn,DB_NAME,tablename,samples,type):
 		conn.commit()
 	cursor.close()
 	conn.close()
-def CELLS_GROUPS_VCF(cursor,conn,samples,group_name,file_type,outdir,cmd_file):
+
+def Group_Samples_VCF_from_Bam_rmd(cursor,conn,samples,group_name,file_type,outdir,cmd_file):
 	m00.FILES_GROUPER(cursor,conn,samples,group_name,file_type,' ')
 	w1 = m00.COMMAND_generator(cursor,conn,[group_name],"samtools mpileup -Duf /data/Analysis/fanxiaoying/database/hg19/00.genome/genome.fa #0 | /data/Analysis/fanxiaoying/software/samtools-0.1.19/bcftools/bcftools view -bvcg -> #1",[file_type],outdir,'.bcf','SNV')
 	w2 = m00.COMMAND_generator(cursor,conn,[group_name],"/data/Analysis/fanxiaoying/software/samtools-0.1.19/bcftools/bcftools view #0 | perl /data/Analysis/fanxiaoying/project/project01_polyA-RNAseq/modules/scripts/vcfutils.pl varFilter -d 5 >#1",['SNV'],outdir,'.vcf','SNV_d5')
