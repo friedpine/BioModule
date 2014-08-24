@@ -47,16 +47,16 @@ def pairend_insertion_size_estimation(cursor,conn,samples,bamrec,outdir,outname,
 	for sample in samples:
 		cursor.execute("select path from files where sample = %s and type = %s",([sample,bamrec]))
 		bam = cursor.fetchall()[0][0]
+		sample_new_name = samplename_transformer(cursor,conn,'sample',outname,sample)
 		outfile = outdir+'/insert_size_'+sample_new_name+'.txt'
 		cursor.execute("insert ignore into files (sample,type,path)values(%s,%s,%s)",([sample,outrec,outfile]))
 		conn.commit()
-		sample_new_name = samplename_transformer(cursor,conn,'sample',outname,sample)
 		out.append('samtools view -f 2 '+bam+" | awk '{print $9}' > "+outfile)
 		if os.path.exists(outfile):
 			f = open(outfile)
 			f1 = f.read()
 			f2 = re.split('\n',f1)
-			import numpy
+			import numpy as np
 			mean = np.mean([abs(int(i)) for i in f2[1:len(f2)-10]])
 			std = np.std([abs(int(i)) for i in f2[1:len(f2)-10]])    
 			print sample_new_name,mean,std

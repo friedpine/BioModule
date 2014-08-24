@@ -2,33 +2,33 @@ from __future__ import division
 import re
 import os
 import matplotlib
-matplotlib.use('Cairo')
 import matplotlib.pyplot as plt
-import time
 import numpy as np
 import pysam
-import d00.samples as d00
+import d00_sample as d00
 
 
 def Depth_Data(bamfiles,position):
 	outs = []
 	for samfile in bamfiles:
-		out = []
+		pos = []
+		depth = []
 		for column in samfile.pileup(position[0],position[1],position[2]):
-			out.append(column.n)
-		outs.append(out)
-	return outs 
+			pos.append(column.pos)
+			depth.append(column.n)
+		outs.append([pos,depth])
+	return outs
 
 def Plot_Depth_Data(samples,depths,filename):
-		plt.figure(figsize=(10, 8), dpi=150)
-		n = len(samples)
-    for i in range(n):
-			ax = plt.subplot(n,1,i+1)
-			ax.bar(range(len(depths[1])),depths[i],label=samples[i])
-			leg = plt.legend(2)
-			leg.draw_frame(False)
-		plt.savefig(filename)
-		plt.clf()
+	plt.figure(figsize=(10, 8), dpi=150)
+	n = len(samples)
+	for i in range(n):
+		ax = plt.subplot(n,1,i+1)
+		ax.bar(range(len(depths[1])),depths[i],label=samples[i])
+		leg = plt.legend(2)
+		leg.draw_frame(False)
+	plt.savefig(filename)
+	plt.clf()
 
 def Samples_Bam_Handles(cursor,conn,samples,bamtype):
 	bamfiles = []
