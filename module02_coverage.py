@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import time
 import numpy as np
 import pysam
+import d00.samples as d00
 
 
 def Depth_Data(bamfiles,position):
@@ -28,8 +29,13 @@ def Plot_Depth_Data(samples,depths,filename):
 			leg.draw_frame(False)
 		plt.savefig(filename)
 		plt.clf()
-	
 
+def Samples_Bam_Handles(cursor,conn,samples,bamtype):
+	bamfiles = []
+	for sample in samples:
+		file_path = d00.get_sample_file(cursor,sample,bamtype)
+		bamfiles.append(pysam.Samfile(file_path, "rb"))
+	return bamfiles
 
 class coverage(dict):
 	def initialize(self,database):
