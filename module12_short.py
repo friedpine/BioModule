@@ -108,12 +108,14 @@ while 1:
   state,seq,qua = pairs_merge_by_adaptor(seq1,seq2,qua1,qua2)
   if state == 1:
     adaptor += 1
-    print >>out,head1,seq,"\n","+","\n",qua
+    if len(seq)>=25:
+      print >>out,head1,seq,"\n","+","\n",qua
   else:
     state,seq,qua = pair_merge_by_overlap(seq1,seq2,qua1,qua2)
     if state == 1:
       overlap += 1
-      print >>out,head1,seq,"\n","+","\n",qua
+      if len(seq)>=25: 
+        print >>out,head1,seq,"\n","+","\n",qua
     else:
       others += 1
 print total,adaptor,overlap,others
