@@ -109,15 +109,16 @@ while 1:
   if state == 1:
     adaptor += 1
     if len(seq)>=25:
-      print >>out,head1,seq"\n""+""\n",qua
+    	out.write(head1+seq+"\n+\n"+qua+"\n")
   else:
     state,seq,qua = pair_merge_by_overlap(seq1,seq2,qua1,qua2)
     if state == 1:
       overlap += 1
       if len(seq)>=25: 
-        print >>out,head1,seq"\n""+""\n",qua
+        out.write(head1+seq+"\n+\n"+qua+"\n")
     else:
       others += 1
+out.close()
 print total,adaptor,overlap,others
   
 
