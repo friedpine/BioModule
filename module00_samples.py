@@ -89,6 +89,7 @@ def FILES_GROUPER(cursor,conn,samples,newsName,intype,sep):
 	method = "FILES_GROUPER #"+" "+intype
 	cursor.execute("replace into files (sample,type,path,method)values(%s,%s,%s,%s)",[newsName,intype,newname,method])
 	conn.commit()
+
 def MAPPED_SINGLE(cursor,conn,samples,bamtype,folder,rec):
 	cmds = []
 	for sample in samples:
@@ -101,10 +102,10 @@ def MAPPED_SINGLE(cursor,conn,samples,bamtype,folder,rec):
 	conn.commit()
 	return cmds
 	
-def BOWTIE_alignment(cursor,conn,samples,species,ref,ins,outdir,usage,rec):
+def BOWTIE_PAIRED(cursor,conn,samples,species,ref,ins,outdir,usage,rec):
 	cmds = []
 	for sample in samples:
-		path = outdir+'/BAM.'+sample+'_'+rec+'.bam'
+		path = outdir+'/BAM.'+rec+'_'+sample+'.bam'
 		fq1 = d00.get_sample_file(cursor,sample,ins[0])
 		fq2 = d00.get_sample_file(cursor,sample,ins[1])
 		cmd = 'bash /data/Analysis/fanxiaoying/project/project01_polyA-RNAseq/modules/scripts/BOWTIE.pair.sh %s %s %s %s %s' %(fq1,fq2,path[:-4],refall[species]['bowtie2'][ref],usage)
