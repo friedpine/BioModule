@@ -13,11 +13,21 @@ def Depth_Data(bamfiles,position):
 	for samfile in bamfiles:
 		pos = []
 		depth = []
-		for column in samfile.pileup(position[0],position[1],position[2]):
+		for read in samfile.pileup(posit ion[0],position[1],position[2]):
 			pos.append(column.pos)
 			depth.append(column.n)
 		outs.append([pos,depth])
 	return outs
+
+def Depth_Data2(bamfiles,position):
+	outs = []
+	for samfile in bamfiles:
+		reads = []
+		for read in samfile.fetch(posit ion[0],position[1],position[2]):
+			reads.append(read)
+		outs.append(reads)
+	return outs
+	
 
 def Plot_Depth_Data(samples,depths,filename):
 	plt.figure(figsize=(10, 8), dpi=150)
