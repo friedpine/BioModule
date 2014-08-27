@@ -22,10 +22,22 @@ def Depth_Data(bamfiles,position):
 def Depth_Data2(bamfiles,position):
 	outs = []
 	for samfile in bamfiles:
-		reads = []
+		sites = {}
 		for read in samfile.fetch(posit ion[0],position[1],position[2]):
-			reads.append(read)
-		outs.append(reads)
+			start = read.pos
+			cigars = [x for x in read.cigar if x[0]!=1]
+			poses = [0]*len(cigars)
+			for x in range(1,len(poses)):
+				poses[x] = poses[x-1]+cigars[x-1][1]
+			for id,seg in enumerate(cigars):
+				if seg[0] != 1:
+					continue
+				for site in range(start+poses[id],start+poses[id]+seg[1]):
+					if site in sites:
+						sites[site] += 1
+					else:
+						sites[site] = 1
+		outs.append(sites)
 	return outs
 	
 
