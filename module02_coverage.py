@@ -41,7 +41,7 @@ def Depth_Data2(bamfiles,position):
 		outs.append(sites)
 	return outs
 
-def Depth_Data2_Process_for_Plot(datas,samples,points,least_segs,whole_range,concern_ranges):
+def Depth_Data2_Process_for_Plot(datas,samples,points,min_segs,whole_range,concern_ranges):
 	out = []
 	other_ranges = [(concern_ranges[i-1][1],concern_ranges[i][0]) for i in range(1,len(concern_ranges))]
 	if whole_range[0]<concern_ranges[0][0]:
@@ -57,8 +57,18 @@ def Depth_Data2_Process_for_Plot(datas,samples,points,least_segs,whole_range,con
 	sampling_ratio_for_introns = int(intron_len/(points-exons_ratio*points))
 	frame_id = []
 	frame_pos = []
-
-	
+	frame_type = []
+	for exon in concern_ranges:
+		sites = range(exon[0],exon[1],min(sampling_ratio_for_exons,int((exon[1]-exon[0])/)))	
+		frame_pos += sites
+		frame_type += [1]*len(sites)
+	for exon in other_ranges:
+        sites = range(exon[0],exon[1],min(sampling_ratio_for_introns,int((exon[1]-exon[0])/)))
+        frame_pos += sites
+        frame_type += [0]*len(sites)
+	frame_pos_sort = sorted(frame_pos)
+	frame_type_sort = [frame_type[frame_pos.index(x)] for x in frame_pos_sort]
+	return {frame_pos:frame_pos_sort,frame_type:frame_type_sort}
 
 def Plot_Depth_Data(samples,depths,filename):
 	plt.figure(figsize=(10, 8), dpi=150)
