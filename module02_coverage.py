@@ -81,12 +81,12 @@ def Depth_Data2_Process_for_Plot(datas,samples,points,min_segs,whole_range,conce
 	return out
 	
 
-def Plot_Depth_Data(samples,depths,filename):
+def Plot_Depth_Data(samples,datas,filename):
 	plt.figure(figsize=(10, 8), dpi=150)
 	n = len(samples)
-	for i in range(n):
+	for sample in samples:
 		ax = plt.subplot(n,1,i+1)
-		ax.bar(range(len(depths[1])),depths[i],label=samples[i])
+		ax.bar(datas['id'],datas[sample],label=sample)
 		leg = plt.legend(2)
 		leg.draw_frame(False)
 	plt.savefig(filename)
