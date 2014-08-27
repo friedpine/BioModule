@@ -79,16 +79,15 @@ def Depth_Data2_Process_for_Plot(datas,samples,points,min_segs,whole_range,conce
 			if site in frame_pos_sort:
 				out[sample][frame_pos_sort.index(site)] = datas[sample][site]
 	return out
-	
 
 def Plot_Depth_Data(samples,datas,filename):
 	plt.figure(figsize=(10, 8), dpi=150)
 	n = len(samples)
-	for sample in samples:
-		ax = plt.subplot(n,1,i+1)
+	for number,sample in enumerate(samples):
+		ax = plt.subplot(n,1,number+1)
+		print sample,datas['id'][1:100],datas[sample][1:100]
 		ax.bar(datas['id'],datas[sample],label=sample)
-		leg = plt.legend(2)
-		leg.draw_frame(False)
+		ax.set_xlim([0, int(max(datas['id'])/200+1)*200])
 	plt.savefig(filename)
 	plt.clf()
 
