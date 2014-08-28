@@ -13,7 +13,7 @@ tablename = "lihang.CNV_M10_1M"
 binsize = 1000000
 
 def GET_BINNED_COUNTS_ALONG_GENOME(cursor,conn,bamfile,binsize,chrom_size,tablename):
-  sql_table = "CREATE TABLE "+tablename+" (chr varchar(10),bin_id int, counts int)"	
+  sql_table = "CREATE TABLE "+tablename+" (chr varchar(10),bin_id int, counts int)"
   cursor.execute("select chr,`length` from "+chrom_size)
   results = cursor.fetchall()
   samfile = pysam.Samfile(bamfile, "rb")
@@ -27,8 +27,8 @@ def GET_BINNED_COUNTS_ALONG_GENOME(cursor,conn,bamfile,binsize,chrom_size,tablen
     print "EXISTS"
   cursor.executemany("insert ignore into "+tablename+" values(%s,%s,%s) """,counts)
   conn.commit()
-  
-      
+
+
 def GET_BINNED_COUNTS_ALONG_GENOME_Multiple(cursor,conn,samples,bamfile,binsize,chrom_size,tablename):
   print tablename,
   colnames = ['chr','bin_id']+samples
@@ -37,12 +37,12 @@ def GET_BINNED_COUNTS_ALONG_GENOME_Multiple(cursor,conn,samples,bamfile,binsize,
   in05.CREATE_TABLE(cursor,tablename,colnames,types)
   cursor.execute("select chr,`length` from "+chrom_size)
   results = cursor.fetchall()
-  
+
   samfiles = []
   for sample in samples:
     bamname = d00.get_sample_file(cursor,sample,bamfile)
     samfiles.append(pysam.Samfile(bamname, "rb"))
-  
+
   counts = []
   for chr in results:
     for pos in range(1,int(chr[1]),binsize):
@@ -55,3 +55,5 @@ def GET_BINNED_COUNTS_ALONG_GENOME_Multiple(cursor,conn,samples,bamfile,binsize,
   print up_cmd
   cursor.executemany(up_cmd,counts)
   conn.commit()
+ def ZHANGMINGLEI(info):
+    print info
