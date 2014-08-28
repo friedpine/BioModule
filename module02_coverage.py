@@ -61,6 +61,22 @@ def Depth_Data2(samples,bamfiles,position):
 		outs[samples[sampleid]] = sites
 	return outs
 
+def Depth_Data2_Process_for_APA(datas,samples,whole_range,strand):
+	out = {}
+	out['id'] = range(0,len(whole_range[1]-whole_range[0]))
+	if strand == "+":
+		out['pos'] = range(min(whole_range),max(whole_range),1)
+	elif strand == '-':
+		out['pos'] = range(max(whole_range),max(whole_range),-1)
+	out['types'] = [1]*len(out['pos'])
+	for sample in samples:
+		out[sample] = [0]*len(frame_pos_sort)
+		for site in datas[sample]:
+			if site in out['pos']:
+				out[sample][out['pos'].index(site)] = datas[sample][site]
+	return out
+	
+	
 def Depth_Data2_Process_for_Plot(datas,samples,points,min_segs,whole_range,concern_ranges):
 	out = {}
 	other_ranges = [(concern_ranges[i-1][1]+1,concern_ranges[i][0]-1) for i in range(1,len(concern_ranges))]
