@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pysam
 import d00_sample as d00
+import infra00_ranges_operate as in00
 
 
 def Depth_Data(bamfiles,position):
@@ -58,15 +59,22 @@ def Depth_Data2(samples,bamfiles,position):
 					else:
 						sites[site] = 1
 		outs[samples[sampleid]] = sites
-	return outs
+	return 
 
-def Depth_Data2_Process_for_APA(datas,samples,whole_range,strand):
+
+def Depth_Data2_Process_transcript(datas,samples,whole_range,introns,strand):
 	out = {}
-	out['id'] = range(0,len(whole_range[1]-whole_range[0]))
-	if strand == "+":
-		out['pos'] = range(min(whole_range),max(whole_range),1)
-	elif strand == '-':
-		out['pos'] = range(max(whole_range),max(whole_range),-1)
+	whole_range[0] = min(whole_range[0],min([min(i) for i in introns]))
+	whole_range[1] = max(whole_range[1],max([max(i) for i in introns]))
+	out_ranges = in00.ranges_minus(whole_range,introns)
+	out['id'] = range(1,sum([x[1]-x[0]+1 for x in a])+1)
+	out['pos'] = []
+	for out_range in out_ranges:
+		out['pos'] = out['pos']+range(min(out_range),max(out_range)+1)
+	if strand == '+':
+		out['pos'] = sorted(out['pos'])
+	if strand == '-':
+		out['pos'] = sorted(out['pos'])[::-1]
 	out['types'] = [1]*len(out['pos'])
 	for sample in samples:
 		out[sample] = [0]*len(frame_pos_sort)
