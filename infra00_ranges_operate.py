@@ -40,6 +40,7 @@ def ranges_minus(big_range,little_ranges,least_gap):
 	if little_ranges == []:
 		return big_range
 	else:
+		little_ranges = [i for i in little_ranges if min(i)>=min(big_range) and max(i)<=max(big_range)]
 		sorted_ranges = sorted(little_ranges)
 		gap_ranges = [[sorted_ranges[i][1]+1,sorted_ranges[i+1][0]-1] for i in range(len(sorted_ranges)-1) if sorted_ranges[i][1]+least_gap<sorted_ranges[i+1][0]-1]
 		if sorted_ranges[0][0]>big_range[0]:
