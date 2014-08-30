@@ -37,13 +37,17 @@ def get_longest_range(ranges):
 	out = [a[0],ranges.index(a[0])]
 	return out
 def ranges_minus(big_range,little_ranges,least_gap):
-	sorted_ranges = sorted(little_ranges)
-	gap_ranges = [[sorted_ranges[i][1]+1,sorted_ranges[i+1][0]-1] for i in range(len(sorted_ranges)-1) if sorted_ranges[i][1]+least_gap<sorted_ranges[i+1][0]-1]
-	if sorted_ranges[0][0]>big_range[0]:
-		gap_ranges.append([big_range[0],sorted_ranges[0][0]-1])
-	if sorted_ranges[-1][1]<big_range[1]:
-		gap_ranges.append([sorted_ranges[-1][1]+1,big_range[1]])
-	return sorted(gap_ranges)
+	if little_ranges == []:
+		return big_range
+	else:
+		sorted_ranges = sorted(little_ranges)
+		gap_ranges = [[sorted_ranges[i][1]+1,sorted_ranges[i+1][0]-1] for i in range(len(sorted_ranges)-1) if sorted_ranges[i][1]+least_gap<sorted_ranges[i+1][0]-1]
+		if sorted_ranges[0][0]>big_range[0]:
+			gap_ranges.append([big_range[0],sorted_ranges[0][0]-1])
+		if sorted_ranges[-1][1]<big_range[1]:
+			gap_ranges.append([sorted_ranges[-1][1]+1,big_range[1]])
+		return sorted(gap_ranges)
+	
 def range_sort_len(ranges,reverse_or_not):
 	a = sorted(ranges,key=lambda x:(x[1]-x[0]),reverse= reverse_or_not)
 	return a
