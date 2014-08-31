@@ -59,15 +59,14 @@ def Depth_Data2(samples,bamfiles,position):
 					else:
 						sites[site] = 1
 		outs[samples[sampleid]] = sites
-	return 
+	return outs 
 
 
 def Depth_Data2_Process_transcript(datas,samples,whole_range,introns,strand):
 	out = {}
-	whole_range[0] = min(whole_range[0],min([min(i) for i in introns]))
-	whole_range[1] = max(whole_range[1],max([max(i) for i in introns]))
-	out_ranges = in00.ranges_minus(whole_range,introns)
-	out['id'] = range(1,sum([x[1]-x[0]+1 for x in a])+1)
+	out_ranges = in00.ranges_minus(whole_range,introns,0)
+	print out_ranges
+	out['id'] = range(1,sum([x[1]-x[0]+1 for x in out_ranges])+1)
 	out['pos'] = []
 	for out_range in out_ranges:
 		out['pos'] = out['pos']+range(min(out_range),max(out_range)+1)
@@ -77,11 +76,15 @@ def Depth_Data2_Process_transcript(datas,samples,whole_range,introns,strand):
 		out['pos'] = sorted(out['pos'])[::-1]
 	out['types'] = [1]*len(out['pos'])
 	for sample in samples:
-		out[sample] = [0]*len(frame_pos_sort)
+		out[sample] = [0]*len(out['pos'])
 		for site in datas[sample]:
 			if site in out['pos']:
 				out[sample][out['pos'].index(site)] = datas[sample][site]
 	return out
+
+def Look_For_Downhills(datas,samples,min_len,min_depth):
+    for sample in samples:
+        strs = "".join([str((x>=min_depth)*1) for x in datas[sample]])
 	
 	
 def Depth_Data2_Process_for_Plot(datas,samples,points,min_segs,whole_range,concern_ranges):

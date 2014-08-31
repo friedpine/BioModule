@@ -32,13 +32,15 @@ def ranges_overlap(r1,r2):
 	else:
 		out = ['F',0,0]
 	return out
+
 def get_longest_range(ranges):
 	a = sorted(ranges,key=lambda x:(x[1]-x[0]),reverse= True)	
 	out = [a[0],ranges.index(a[0])]
 	return out
+
 def ranges_minus(big_range,little_ranges,least_gap):
 	if little_ranges == []:
-		return big_range
+		return [big_range]
 	else:
 		little_ranges = [i for i in little_ranges if min(i)>=min(big_range) and max(i)<=max(big_range)]
 		sorted_ranges = sorted(little_ranges)
@@ -52,9 +54,11 @@ def ranges_minus(big_range,little_ranges,least_gap):
 def range_sort_len(ranges,reverse_or_not):
 	a = sorted(ranges,key=lambda x:(x[1]-x[0]),reverse= reverse_or_not)
 	return a
+
 def random_sub_range(range,length):
 	a = int(rd.random()*(range[1]-range[0]))
 	return [a,a+length-1]
+
 def merge_ranges(ranges,gap):
 	ranges = sorted(ranges,key=lambda x:x[0])  
 	for i in range(1,len(ranges)):
