@@ -1,4 +1,6 @@
+import os,sys,re
 import random as rd
+
 def newfunc_set_count_sort(all):
 	t = {}
 	out = ''
