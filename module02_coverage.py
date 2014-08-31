@@ -84,9 +84,13 @@ def Depth_Data2_Process_transcript(datas,samples,whole_range,introns,strand):
 
 def Look_For_Downhills(datas,samples,min_len,min_depth):
     for sample in samples:
-        strs = "".join([str((x>=min_depth)*1) for x in datas[sample]])
-	
-	
+        #strs = "".join([str((x>=min_depth)*1) for x in datas[sample]])
+        strs  = "".join([str((sum(a[x-10:x])>=sum(a[x:x+10]) and sum(a[x:x+10])>10)*1) for x in range(10,len(a)-10)])
+        strs = '0000000000'+strs
+        for m in re.finditer('1{1,}',strs):
+        	if m.end()-m.start()>min_len:
+        		print m.start(),m.end(),m.end()-m.start(),sum(datas[sample][m.start():m.end()])/(m.end()-m.start())
+        	
 def Depth_Data2_Process_for_Plot(datas,samples,points,min_segs,whole_range,concern_ranges):
 	out = {}
 	other_ranges = [(concern_ranges[i-1][1]+1,concern_ranges[i][0]-1) for i in range(1,len(concern_ranges))]
