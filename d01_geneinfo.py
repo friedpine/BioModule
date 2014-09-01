@@ -1,6 +1,7 @@
 import MySQLdb as mb
 import re,os
 
-def mm10_ENSG_3UTR(cursor,conn,genename,flank_len):
-	cursor.execute("select chr,strand,left_pos,right_pos from mm10_ensembl.UTR3 where genename = %s",([genename]))
+def mm10_refGene_3UTR(cursor,conn,genename,flank_len):
+	cursor.execute("select transc,chr,strand,`left`,`right` from mm10_refseq.utr3 where gene = %s",([genename]))
 	return cursor.fetchall()[0]
+		
