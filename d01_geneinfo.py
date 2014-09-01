@@ -4,7 +4,7 @@ import re,os
 def mm10_refGene_3UTR(cursor,conn,genename,flank_len):
 	cursor.execute("select transc,chr,strand,`left`,`right` from mm10_refseq.utr3 where gene = %s",([genename]))
 	outs = {}
-	for x cursor.fetchall():
+	for x in cursor.fetchall():
 		pos = str(x[3])+'_'+str(x[4])
 		if pos in outs:
 			continue
