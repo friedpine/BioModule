@@ -12,17 +12,17 @@ def Look_For_Downhills(datas,samples,min_len,min_depth,min_seq):
 	outs = {}
 	for sample in samples:
 		outs[sample] = []
-        d = datas[sample]
-        strs  = "".join([str((sum(d[x-10:x])>=sum(d[x:x+10]) and sum(d[x-10:x])>=10)*1) for x in range(10,len(d)-10)])
-        strs = '0000000000'+strs
-        down_hills = []
-        for m in re.finditer('1{1,}',strs):
-            if m.end()-m.start()>min_len:
-                down_hills.append([m.start(),m.end()])
+		d = datas[sample]
+		strs  = "".join([str((sum(d[x-10:x])>=sum(d[x:x+10]) and sum(d[x-10:x])>=10)*1) for x in range(10,len(d)-10)])
+		strs = '0000000000'+strs
+		down_hills = []
+		for m in re.finditer('1{1,}',strs):
+			if m.end()-m.start()>min_len:
+				down_hills.append([m.start(),m.end()])
 		down_hills_sep = [down_hills[i] for i in range(0,len(down_hills)-1) if down_hills[i+1][0]>=down_hills[i][1]+min_seq]    
 		down_hills_sep.append(down_hills[-1])
 		print down_hills_sep
-        for i in down_hills_sep:
+		for i in down_hills_sep:
 			outs[sample].append(i)
 			print sample,i
 	print outs
