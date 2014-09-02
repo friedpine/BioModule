@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 def Smooth_By_Windows():
   print "SMOOTH"
 
-def Look_For_Downhills(datas,samples,min_len,min_depth,min_seq,min_ratio):
+def Look_For_Downhills(datas,samples,min_len,min_depth,mergeable_gap,min_ratio):
 	outs = {}
 	for sample in samples:
 		outs[sample] = []
@@ -19,13 +19,17 @@ def Look_For_Downhills(datas,samples,min_len,min_depth,min_seq,min_ratio):
 		for m in re.finditer('1{1,}',strs):
 			if m.end()-m.start()>min_len and sum(d[m.start()-10:m.start()])*min_ratio>sum(d[m.end()-10:m.end()]):
 				down_hills.append([m.start(),m.end()])
-		down_hills_sep = [down_hills[i] for i in range(0,len(down_hills)-1) if down_hills[i+1][0]>=down_hills[i][1]+min_seq]    
+		#MERGE_THE_RANGES:GAP_LENGTH<mergeable_gap and with near coverage depth
+		down_hills_merged = []
+		merge_infos = [0]
+		for i in range():
+			
+
+		down_hills_sep = [down_hills[i] for i in range(0,len(down_hills)-1) if down_hills[i+1][0]>=down_hills[i][1]+min_sep]    
 		if down_hills != []:
 			down_hills_sep.append(down_hills[-1])
 		for i in down_hills_sep:
 			outs[sample].append(i)
-		print d
-		print strs
 	return outs
 
 def Plot_APA_Downhills(samples,datas,downhills,points,ymax,filename):
@@ -67,10 +71,10 @@ def Downhills(cursor,conn,samples,bam_handles,genename,flanksize,min_len,min_sep
 		datas = m02.Depth_Data2(samples,bam_handles,[utr['chr'][3:]]+utr['range_flank'])
 		frames = m02.Depth_Data2_Process_transcript(datas,samples,utr['range_flank'],[],utr['strand'])
 		downhills = Look_For_Downhills(frames,samples,min_len,0,min_sep,min_ratio)
-		#m02.Plot_Depth_Data(samples,frames,rec+genename+'_'+utr['transc']+'.png')
 		Plot_APA_Downhills(samples,frames,downhills,points,ymax,rec+genename+'_'+utr['transc']+'.png')
   
-def Diownhills_Intermediate(cursor,conn,samples,bam_handles,genename,flanksize):
+
+def Downhills_Intermediate(cursor,conn,samples,bam_handles,genename,flanksize,min_len,min_sep,min_ratio):
 	UTR3 = d01.mm10_refGene_3UTR(cursor,conn,genename,flanksize)
 	if UTR3 == {}:
 		print "NO TRANSC"
@@ -81,5 +85,3 @@ def Diownhills_Intermediate(cursor,conn,samples,bam_handles,genename,flanksize):
 		frames = m02.Depth_Data2_Process_transcript(datas,samples,utr['range_flank'],[],utr['strand'])
 		downhills = Look_For_Downhills(frames,samples,min_len,0,min_sep,min_ratio)
 		print downhills
-	
-	
