@@ -23,7 +23,8 @@ def Look_For_Downhills(datas,samples,min_len,min_depth,min_seq,min_ratio):
 		down_hills_sep.append(down_hills[-1])
 		for i in down_hills_sep:
 			outs[sample].append(i)
-	print outs
+		print d
+		print strs
 	return outs
 
 def Plot_APA_Downhills(samples,datas,downhills,points,ymax,filename):
@@ -67,4 +68,16 @@ def Downhills(cursor,conn,samples,bam_handles,genename,flanksize,min_len,min_sep
 		#m02.Plot_Depth_Data(samples,frames,rec+genename+'_'+utr['transc']+'.png')
 		Plot_APA_Downhills(samples,frames,downhills,points,ymax,rec+genename+'_'+utr['transc']+'.png')
   
+def Diownhills_Intermediate(cursor,conn,samples,bam_handles,genename,flanksize):
+	UTR3 = d01.mm10_refGene_3UTR(cursor,conn,genename,flanksize)
+	if UTR3 == {}:
+		print "NO TRANSC"
+		return 0
+	for pos in UTR3:
+		utr = UTR3[pos]
+		datas = m02.Depth_Data2(samples,bam_handles,[utr['chr'][3:]]+utr['range_flank'])
+		frames = m02.Depth_Data2_Process_transcript(datas,samples,utr['range_flank'],[],utr['strand'])
+		downhills = Look_For_Downhills(frames,samples,min_len,0,min_sep,min_ratio)
+		print downhills
+	
 	
