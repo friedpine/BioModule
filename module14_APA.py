@@ -20,7 +20,8 @@ def Look_For_Downhills(datas,samples,min_len,min_depth,min_seq,min_ratio):
 			if m.end()-m.start()>min_len and sum(d[m.start()-10:m.start()])*min_ratio>sum(d[m.end()-10:m.end()]):
 				down_hills.append([m.start(),m.end()])
 		down_hills_sep = [down_hills[i] for i in range(0,len(down_hills)-1) if down_hills[i+1][0]>=down_hills[i][1]+min_seq]    
-		down_hills_sep.append(down_hills[-1])
+		if down_hills != []:
+			down_hills_sep.append(down_hills[-1])
 		for i in down_hills_sep:
 			outs[sample].append(i)
 	print outs
@@ -44,11 +45,11 @@ def Plot_APA_Downhills(samples,datas,downhills,points,ymax,filename):
 					blue_y.append(depths[site])
 		gray_x = [x for x in range(0,len(ids)) if x not in blue_x]
 		gray_y = [depths[ids[x]]  for x in gray_x]
-		ax.bar(gray_x,gray_y,color='gray')
+		ax.bar(gray_x,gray_y,color='gray',edgecolor='gray')
 		ax.bar(blue_x,blue_y,color='blue',edgecolor='blue')
 		ax.set_xlim([0,len(ids)])
 		if ymax=="MAX":
-			ymax = max(gray_y+blue_y)
+			ymax = max(gray_y)
 		ax.set_ylim([0,ymax])
 	plt.savefig(filename)
 	plt.clf()	
@@ -56,6 +57,7 @@ def Plot_APA_Downhills(samples,datas,downhills,points,ymax,filename):
 
 def Downhills(cursor,conn,samples,bam_handles,genename,flanksize,min_len,min_sep,min_ratio,points,ymax,rec):
 	UTR3 = d01.mm10_refGene_3UTR(cursor,conn,genename,flanksize)
+	print genename
 	if UTR3 == {}:
 		print "NO TRANSC"
 		return 0
