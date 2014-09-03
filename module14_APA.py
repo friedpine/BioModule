@@ -20,6 +20,8 @@ def Look_For_Downhills(datas,samples,min_len,min_depth,mergeable_gap,min_ratio):
 			if m.end()-m.start()>min_len and sum(d[m.start()-10:m.start()])*min_ratio>sum(d[m.end()-10:m.end()]):
 				down_hills.append([m.start(),m.end()])
 		#MERGE_THE_RANGES:GAP_LENGTH<mergeable_gap and with near coverage depth
+		if down_hills == []:
+			continue
 		down_hills_merged = []
 		merge_infos = '0'
 		for x in range(1,len(down_hills)):
@@ -33,14 +35,8 @@ def Look_For_Downhills(datas,samples,min_len,min_depth,mergeable_gap,min_ratio):
 					temp = '1'
 			merge_infos = merge_infos+temp
 		for m in re.finditer('01{0,}',merge_infos):
-				
-				
-						
-	
-		down_hills_sep = [down_hills[i] for i in range(0,len(down_hills)-1) if down_hills[i+1][0]>=down_hills[i][1]+min_sep]    
-		if down_hills != []:
-			down_hills_sep.append(down_hills[-1])
-		for i in down_hills_sep:
+			down_hills_merged.append([down_hills[m.start()][0],down_hills[m.end()-1][1]])	
+		for i in down_hills_merged:
 			outs[sample].append(i)
 	return outs
 
@@ -72,7 +68,7 @@ def Plot_APA_Downhills(samples,datas,downhills,points,ymax,filename):
 	plt.clf()	
 
 
-def Downhills(cursor,conn,samples,bam_handles,genename,flanksize,min_len,min_sep,min_ratio,points,ymax,rec):
+def Downhills(cursor,conn,samples,bam_handles,genename,flanksize,min_len,merge_sep,min_ratio,points,ymax,rec):
 	UTR3 = d01.mm10_refGene_3UTR(cursor,conn,genename,flanksize)
 	print genename
 	if UTR3 == {}:
@@ -82,11 +78,11 @@ def Downhills(cursor,conn,samples,bam_handles,genename,flanksize,min_len,min_sep
 		utr = UTR3[pos]
 		datas = m02.Depth_Data2(samples,bam_handles,[utr['chr'][3:]]+utr['range_flank'])
 		frames = m02.Depth_Data2_Process_transcript(datas,samples,utr['range_flank'],[],utr['strand'])
-		downhills = Look_For_Downhills(frames,samples,min_len,0,min_sep,min_ratio)
+		downhills = Look_For_Downhills(frames,samples,min_len,0,merge_sep,min_ratio)
 		Plot_APA_Downhills(samples,frames,downhills,points,ymax,rec+genename+'_'+utr['transc']+'.png')
   
 
-def Downhills_Intermediate(cursor,conn,samples,bam_handles,genename,flanksize,min_len,min_sep,min_ratio):
+def Downhills_Intermediate(cursor,conn,samples,bam_handles,genename,flanksize,min_len,merge_sep,min_ratio):
 	UTR3 = d01.mm10_refGene_3UTR(cursor,conn,genename,flanksize)
 	if UTR3 == {}:
 		print "NO TRANSC"
@@ -95,5 +91,5 @@ def Downhills_Intermediate(cursor,conn,samples,bam_handles,genename,flanksize,mi
 		utr = UTR3[pos]
 		datas = m02.Depth_Data2(samples,bam_handles,[utr['chr'][3:]]+utr['range_flank'])
 		frames = m02.Depth_Data2_Process_transcript(datas,samples,utr['range_flank'],[],utr['strand'])
-		downhills = Look_For_Downhills(frames,samples,min_len,0,min_sep,min_ratio)
+		downhills = Look_For_Downhills(frames,samples,min_len,0,merge_sep,min_ratio)
 		print downhills
