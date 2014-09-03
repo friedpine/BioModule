@@ -21,10 +21,22 @@ def Look_For_Downhills(datas,samples,min_len,min_depth,mergeable_gap,min_ratio):
 				down_hills.append([m.start(),m.end()])
 		#MERGE_THE_RANGES:GAP_LENGTH<mergeable_gap and with near coverage depth
 		down_hills_merged = []
-		merge_infos = [0]
-		for i in range():
-			
-
+		merge_infos = '0'
+		for x in range(1,len(down_hills)):
+			temp = '0'
+			down_range = down_hills[x]
+			down_range_front = down_hills[x-1]
+			if down_range[0]<down_range_front[1]+mergeable_gap:
+				depth_range = sum(d[down_range[0]:down_range[0]+10])
+				depth_range_front = sum(d[down_range_front[1]-10:down_range_front[1]])
+				if abs(depth_range-depth_range_front)<10 or min(depth_range,depth_range_front)> 0.75*max(depth_range,depth_range_front): 
+					temp = '1'
+			merge_infos = merge_infos+temp
+		for m in re.finditer('01{0,}',merge_infos):
+				
+				
+						
+	
 		down_hills_sep = [down_hills[i] for i in range(0,len(down_hills)-1) if down_hills[i+1][0]>=down_hills[i][1]+min_sep]    
 		if down_hills != []:
 			down_hills_sep.append(down_hills[-1])
