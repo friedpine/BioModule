@@ -4,7 +4,6 @@ import time
 import cPickle as pickle
 import d00_sample as d00
 import d02_db_tables as d02
-
 sys.path.append('/home/fanxiaoying/lib/lib64/python/Bio')
 sys.path.append('/data/Analysis/fanxiaoying/project/project01_polyA-RNAseq/modules')
 refall = pickle.load(open('/data/Analysis/fanxiaoying/project/project01_polyA-RNAseq/modules/Ref.all.dat'))
@@ -45,7 +44,7 @@ def COMMAND_generator(cursor,conn,samples,template,infiles,folder,suffix,rec):
 	for sample in samples:
 		lists = []
 		for i in infiles:
-			lists.append(d00.get_sample_file(cursor,sample,i))			
+			lists.append(d00.get_sample_file(cursor,sample,i))
 		path = folder+'/'+rec+'_'+sample+suffix
 		if suffix=='/':
 			path = path[:-1]
@@ -101,7 +100,7 @@ def MAPPED_SINGLE(cursor,conn,samples,bamtype,folder,rec):
 		cmds.append(cmd)
 	conn.commit()
 	return cmds
-	
+
 def BOWTIE_PAIRED(cursor,conn,samples,species,ref,ins,outdir,usage,rec):
 	cmds = []
 	for sample in samples:
@@ -115,12 +114,12 @@ def BOWTIE_PAIRED(cursor,conn,samples,species,ref,ins,outdir,usage,rec):
 		if not os.path.exists(path):
 			cmds.append(cmd)
 	return cmds
-	
+
 def BOWTIE_SINGLE(cursor,conn,samples,species,ref,ins,outdir,usage,rec):
 	cmds = []
 	return cmds
 
-	
+
 def BWA_SINGLE(cursor,conn,specise,ref,samples,intype,folder,rec):
 	cmds = []
 	for sample in samples:
