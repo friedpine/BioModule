@@ -3,6 +3,7 @@ import module02_coverage as m02
 import d01_geneinfo as d01
 import matplotlib
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 def Smooth_By_Windows():
@@ -39,6 +40,25 @@ def Look_For_Downhills(datas,samples,min_len,min_depth,mergeable_gap,min_ratio):
 		for i in down_hills_merged:
 			outs[sample].append(i)
 	return outs
+
+def Fit_For_APA_Site(samples,datas,downhills,min_fit_len):
+	APAs = {}
+	for sample in samples:
+		depth = datas[sample]
+		APA = {}
+		for down in downhills:
+			if depth[down[1]] == 0:
+				down[1] = down[1]-10
+				APA[down[1]] = {'range':down,'depth'=[depth[down[0]],depth[down[1]]],''}
+			else:
+				fit_range_left = down[0]+(down[1]-down[0])*0.3
+				fit_range_right = max(down[0]+min_fit_len,down[0]+(down[1]-down[0])/2)
+				fit_data_x = range(fit_range_left,fit_range_right)
+				fit_data_y = depth[fit_range_left:fit_range_right]
+				fit_result = np.polyfit(fit_data_x,fit_data_y,1)
+				fited_APA_site = int(fit_result[1]/abs(fit_result[0]))
+				down[1] = 
+				APA[down[1]] = {'range':down,'depth'=[depth[down[0]],depth[down[1]]]}
 
 def Plot_APA_Downhills(samples,datas,downhills,points,ymax,filename):
 	plt.figure(figsize=(8, 6))
