@@ -80,13 +80,11 @@ def Depth_Data2_Process_transcript(datas,samples,whole_range,introns,strand):
 			if site in out['pos']:
 				out[sample][out['pos'].index(site)] = datas[sample][site]
 	return out
-<<<<<<< HEAD
 	
 def Transc_Data_to_Ranges(datas,samples,min_len,min_depth):
 	ranges = {}
 	for sample in samples:
 		print sample
-=======
 
 def Look_For_Downhills(datas,samples,min_len,min_depth,min_seq):
 	for sample in samples:
@@ -102,7 +100,6 @@ def Look_For_Downhills(datas,samples,min_len,min_depth,min_seq):
 		for i in down_hills_sep:
 			print sample,i        
 
->>>>>>> 06a8df4a488e8ae4aab7ec2810d1a9c051e9f2cc
 	
 def Depth_Data2_Process_for_Plot(datas,samples,points,min_segs,whole_range,concern_ranges):
 	out = {}

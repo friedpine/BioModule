@@ -42,7 +42,7 @@ def Look_For_Downhills(datas,samples,min_len,min_depth,mergeable_gap,min_ratio):
 			outs[sample].append(i)
 	return outs
 
-def Fit_For_APA_Site(cursor,conn,tablename,samples,datas,downhills,min_fit_len):
+def Fit_For_APA_Site(samples,datas,downhills,min_fit_len):
 	APAs = {}
 	for sample in samples:
 		depth = datas[sample]
@@ -50,8 +50,8 @@ def Fit_For_APA_Site(cursor,conn,tablename,samples,datas,downhills,min_fit_len):
 		for down in downhills[sample]:
 			if depth[down[1]] == 0:
 				down[1] = down[1]-10
-				APA[down[1]] = {'pos':down,'depth':[depth[down[0]],1000000],'color':['cyan','red']}
-				APA[down[1]]['area'] = sum(depth[down[0]:down[1]])
+				APA[down[1]] = {'pos':down,'depth':[depth[down[0]],0],'color':['cyan','red']}
+				APA[down[1]]['area'] = sum(depth[down[0]:down[1]])/(down[1]-down[0])
 			else:
 				fit_range_left = int(down[0]+(down[1]-down[0])*0.1)
 				fit_range_right = int(max(fit_range_left+min_fit_len,down[0]+(down[1]-down[0])*0.9))
@@ -61,8 +61,8 @@ def Fit_For_APA_Site(cursor,conn,tablename,samples,datas,downhills,min_fit_len):
 				fited_APA_site = int(fit_result[1]/abs(fit_result[0]))
 				down[1] = fit_range_right
 				down[0] = fit_range_left 
-				APA[fited_APA_site] = {'pos':down+[fited_APA_site],'depth':[depth[down[0]],depth[down[1]]]+[1000000],'color':['cyan','cyan','red']}
-				APA[fited_APA_site]['area'] = sum(depth[down[0]:down[1]])
+				APA[fited_APA_site] = {'pos':down+[fited_APA_site],'depth':[depth[down[0]],depth[down[1]]]+[0],'color':['cyan','cyan','red']}
+				APA[fited_APA_site]['area'] = sum(depth[down[0]:down[1]])/(down[1]-down[0])
 		APAs[sample] = APA
 	return APAs
 
@@ -119,7 +119,17 @@ def Downhills(cursor,conn,tablename,samples,bam_handles,genename,flanksize,min_l
 		downhills_c =copy.deepcopy(downhills)
 		APAs = Fit_For_APA_Site(samples,frames,downhills,min_fit_len)
 		print UTR3,APAs
-		Plot_APA_Downhills(samples,frames,downhills_c,APAs,points,ymax,rec+genename+'_'+utr['transc']+'.png')
+		for sample in samples:
+			for site in APAs[sample]:
+				if site>len(frames['pos']):
+					continue
+				APA = APAs[sample][site]
+				APA_pos = frames['pos'][site]
+				down_left = frames['pos'][APA['pos'][0]]
+				down_right = frames['pos'][APA['pos'][1]]
+				cursor.execute("insert into "+tablename+" values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",[genename,utr['transc'],utr['strand'],sample,utr['chr'],APA_pos,down_left,down_right,APA['depth'][0],APA['depth'][1],APA['area']])
+		conn.commit()
+		#Plot_APA_Downhills(samples,frames,downhills_c,APAs,points,ymax,rec+genename+'_'+utr['transc']+'.png')
   		
 
 
