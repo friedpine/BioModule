@@ -104,35 +104,61 @@ def Plot_APA_Downhills(samples,datas,downhills,APAs,points,ymax,filename):
 	plt.savefig(filename)
 	plt.clf()
 
+def Create_APA_Table(cursor,conn,tablename):
+	sql = 
+		"CREATE TABLE "+tablename+""" (
+  `gene` varchar(30) DEFAULT NULL,
+  `transc` varchar(20) DEFAULT NULL,
+  `strand` varchar(2) DEFAULT NULL,
+  `sample` varchar(20) DEFAULT NULL,
+  `chr` varchar(20) DEFAULT NULL,
+  `pos` int(11) DEFAULT NULL,
+  `down_left` int(11) DEFAULT NULL,
+  `down_right` int(11) DEFAULT NULL,
+  `down_left_depth` int(11) DEFAULT NULL,
+  `down_right_depth` int(11) DEFAULT NULL,
+  `mean` int(11) DEFAULT NULL,
+  UNIQUE KEY `u` (`sample`,`chr`,`pos`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1"""
+	try:
+		cursor.execute(sql)	
+	except:
+		print tablename,"EXISTS"
 
-def Downhills(cursor,conn,tablename,samples,bam_handles,genename,flanksize,min_len,merge_sep,min_ratio,min_fit_len,points,ymax,rec):
-	UTR3 = d01.mm10_refGene_3UTR(cursor,conn,genename,flanksize)
-	print genename
-	if UTR3 == {}:
-		print "NO TRANSC"
-		return 0
-	for pos in UTR3:
-		utr = UTR3[pos]
-		datas = m02.Depth_Data2(samples,bam_handles,[utr['chr'][3:]]+utr['range_flank'])
-		frames = m02.Depth_Data2_Process_transcript(datas,samples,utr['range_flank'],[],utr['strand'])
-		downhills = Look_For_Downhills(frames,samples,min_len,0,merge_sep,min_ratio)
-		downhills_c =copy.deepcopy(downhills)
-		APAs = Fit_For_APA_Site(samples,frames,downhills,min_fit_len)
-		print UTR3,APAs
-		for sample in samples:
-			for site in APAs[sample]:
-				if site>len(frames['pos']):
-					continue
-				APA = APAs[sample][site]
-				APA_pos = frames['pos'][site]
-				down_left = frames['pos'][APA['pos'][0]]
-				down_right = frames['pos'][APA['pos'][1]]
-				cursor.execute("insert into "+tablename+" values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",[genename,utr['transc'],utr['strand'],sample,utr['chr'],APA_pos,down_left,down_right,APA['depth'][0],APA['depth'][1],APA['area']])
-		conn.commit()
+
+
+def Save_APAs_info_to_Database(cursor,conn,tablename,genename,utr,samples,APAs):
+	for sample in samples:
+		for site in APAs[sample]:
+			if site>len(frames['pos']):
+				continue
+			APA = APAs[sample][site]
+			APA_pos = frames['pos'][site]
+			down_left = frames['pos'][APA['pos'][0]]
+			down_right = frames['pos'][APA['pos'][1]]
+			cursor.execute("insert into "+tablename+" values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",[genename,utr['transc'],utr['strand'],sample,utr['chr'],APA_pos,down_left,down_right,APA['depth'][0],APA['depth'][1],APA['area']])
+	conn.commit()
+
+
+
+
+def Downhills(cursor,conn,tablename,samples,bam_handles,genenames,flanksize,min_len,merge_sep,min_ratio,min_fit_len,points,ymax,rec):
+	for genename in genenames:
+		UTR3 = d01.mm10_refGene_3UTR(cursor,conn,genename,flanksize)
+		print genename
+		if UTR3 == {}:
+			print "NO TRANSC"
+			return 0
+		for pos in UTR3:
+			utr = UTR3[pos]
+			datas = m02.Depth_Data2(samples,bam_handles,[utr['chr'][3:]]+utr['range_flank'])
+			frames = m02.Depth_Data2_Process_transcript(datas,samples,utr['range_flank'],[],utr['strand'])
+			downhills = Look_For_Downhills(frames,samples,min_len,0,merge_sep,min_ratio)
+			downhills_c =copy.deepcopy(downhills)
+			APAs = Fit_For_APA_Site(samples,frames,downhills,min_fit_len)
+			Save_APAs_info_to_Database(cursor,conn,tablename,genename,utr,samples,APAs)
 		#Plot_APA_Downhills(samples,frames,downhills_c,APAs,points,ymax,rec+genename+'_'+utr['transc']+'.png')
   		
-
-
 def Downhills_Intermediate(cursor,conn,samples,bam_handles,genename,flanksize,min_len,merge_sep,min_ratio):
 	UTR3 = d01.mm10_refGene_3UTR(cursor,conn,genename,flanksize)
 	if UTR3 == {}:
