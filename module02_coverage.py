@@ -59,14 +59,13 @@ def Depth_Data2(samples,bamfiles,position):
 					else:
 						sites[site] = 1
 		outs[samples[sampleid]] = sites
-	return 
+	return outs 
 
 def Depth_Data2_Process_transcript(datas,samples,whole_range,introns,strand):
 	out = {}
-	whole_range[0] = min(whole_range[0],min([min(i) for i in introns]))
-	whole_range[1] = max(whole_range[1],max([max(i) for i in introns]))
-	out_ranges = in00.ranges_minus(whole_range,introns)
-	out['id'] = range(1,sum([x[1]-x[0]+1 for x in a])+1)
+	out_ranges = in00.ranges_minus(whole_range,introns,0)
+	print out_ranges
+	out['id'] = range(1,sum([x[1]-x[0]+1 for x in out_ranges])+1)
 	out['pos'] = []
 	for out_range in out_ranges:
 		out['pos'] = out['pos']+range(min(out_range),max(out_range)+1)
@@ -76,16 +75,34 @@ def Depth_Data2_Process_transcript(datas,samples,whole_range,introns,strand):
 		out['pos'] = sorted(out['pos'])[::-1]
 	out['types'] = [1]*len(out['pos'])
 	for sample in samples:
-		out[sample] = [0]*len(frame_pos_sort)
+		out[sample] = [0]*len(out['pos'])
 		for site in datas[sample]:
 			if site in out['pos']:
 				out[sample][out['pos'].index(site)] = datas[sample][site]
 	return out
+<<<<<<< HEAD
 	
 def Transc_Data_to_Ranges(datas,samples,min_len,min_depth):
 	ranges = {}
 	for sample in samples:
 		print sample
+=======
+
+def Look_For_Downhills(datas,samples,min_len,min_depth,min_seq):
+	for sample in samples:
+		d = datas[sample]
+		strs  = "".join([str((sum(d[x-10:x])>=sum(d[x:x+10]) and sum(d[x-10:x])>=10)*1) for x in range(10,len(d)-10)])
+		strs = '0000000000'+strs
+		down_hills = []
+		for m in re.finditer('1{1,}',strs):
+			if m.end()-m.start()>min_len:
+				down_hills.append([m.start(),m.end()])
+		down_hills_sep = [down_hills[i] for i in range(0,len(down_hills)-1) if down_hills[i+1][0]>=down_hills[i][1]+min_seq]	
+		down_hills_sep.append(down_hills[-1])
+		for i in down_hills_sep:
+			print sample,i        
+
+>>>>>>> 06a8df4a488e8ae4aab7ec2810d1a9c051e9f2cc
 	
 def Depth_Data2_Process_for_Plot(datas,samples,points,min_segs,whole_range,concern_ranges):
 	out = {}
@@ -126,6 +143,7 @@ def Depth_Data2_Process_for_Plot(datas,samples,points,min_segs,whole_range,conce
 			if site in frame_pos_sort:
 				out[sample][frame_pos_sort.index(site)] = datas[sample][site]
 	return out
+
 
 def Plot_Depth_Data(samples,datas,filename):
 	plt.figure(figsize=(10, 8), dpi=150)
