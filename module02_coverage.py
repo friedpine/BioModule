@@ -61,7 +61,6 @@ def Depth_Data2(samples,bamfiles,position):
 		outs[samples[sampleid]] = sites
 	return 
 
-
 def Depth_Data2_Process_transcript(datas,samples,whole_range,introns,strand):
 	out = {}
 	whole_range[0] = min(whole_range[0],min([min(i) for i in introns]))
@@ -83,6 +82,10 @@ def Depth_Data2_Process_transcript(datas,samples,whole_range,introns,strand):
 				out[sample][out['pos'].index(site)] = datas[sample][site]
 	return out
 	
+def Transc_Data_to_Ranges(datas,samples,min_len,min_depth):
+	ranges = {}
+	for sample in samples:
+		print sample
 	
 def Depth_Data2_Process_for_Plot(datas,samples,points,min_segs,whole_range,concern_ranges):
 	out = {}
