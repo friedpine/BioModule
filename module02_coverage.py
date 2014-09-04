@@ -8,15 +8,10 @@ import d00_sample as d00
 import infra00_ranges_operate as in00
 
 
-def Depth_Data(bamfiles,position):
+def Depth_Read_Counts(samples,bamfiles,position):
 	outs = []
 	for samfile in bamfiles:
-		pos = []
-		depth = []
-		for read in samfile.pileup(position[0],position[1],position[2]):
-			pos.append(column.pos)
-			depth.append(column.n)
-		outs.append([pos,depth])
+		outs.append(samfile.count(position[0],position[1],position[2]))
 	return outs
 
 def Depth_Base_Info(samples,bamfiles,position):
