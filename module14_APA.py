@@ -52,8 +52,8 @@ def Fit_For_APA_Site(samples,datas,downhills,min_fit_len):
 				down[1] = down[1]-10
 				APA[down[1]] = {'pos':down,'depth':[depth[down[0]],1000000],'color':['cyan','red']}
 			else:
-				fit_range_left = int(down[0]+(down[1]-down[0])*0.3)
-				fit_range_right = int(max(fit_range_left+min_fit_len,down[0]+(down[1]-down[0])*0.7))
+				fit_range_left = int(down[0]+(down[1]-down[0])*0.1)
+				fit_range_right = int(max(fit_range_left+min_fit_len,down[0]+(down[1]-down[0])*0.9))
 				fit_data_x = range(fit_range_left,fit_range_right)
 				fit_data_y = depth[fit_range_left:fit_range_right]
 				fit_result = np.polyfit(fit_data_x,fit_data_y,1)
