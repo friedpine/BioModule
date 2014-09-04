@@ -105,8 +105,7 @@ def Plot_APA_Downhills(samples,datas,downhills,APAs,points,ymax,filename):
 	plt.clf()
 
 def Create_APA_Table(cursor,conn,tablename):
-	sql = 
-		"CREATE TABLE "+tablename+""" (
+	sql = "CREATE TABLE "+tablename+""" (
   `gene` varchar(30) DEFAULT NULL,
   `transc` varchar(20) DEFAULT NULL,
   `strand` varchar(2) DEFAULT NULL,
@@ -125,7 +124,7 @@ def Create_APA_Table(cursor,conn,tablename):
 	except:
 		print tablename,"EXISTS"
 
-def Save_APAs_info_to_Database(cursor,conn,tablename,genename,utr,samples,APAs):
+def Save_APAs_info_to_Database(cursor,conn,tablename,genename,frames,utr,samples,APAs):
 	for sample in samples:
 		for site in APAs[sample]:
 			if site>len(frames['pos']):
@@ -134,7 +133,7 @@ def Save_APAs_info_to_Database(cursor,conn,tablename,genename,utr,samples,APAs):
 			APA_pos = frames['pos'][site]
 			down_left = frames['pos'][APA['pos'][0]]
 			down_right = frames['pos'][APA['pos'][1]]
-			cursor.execute("insert into "+tablename+" values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",[genename,utr['transc'],utr['strand'],sample,utr['chr'],APA_pos,down_left,down_right,APA['depth'][0],APA['depth'][1],APA['area']])
+			cursor.execute("insert ignore into "+tablename+" values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",[genename,utr['transc'],utr['strand'],sample,utr['chr'],APA_pos,down_left,down_right,APA['depth'][0],APA['depth'][1],APA['area']])
 	conn.commit()
 
 def Downhills(cursor,conn,tablename,samples,bam_handles,genenames,min_sample_size,flanksize,min_len,merge_sep,min_ratio,min_fit_len,points,ymax,rec):
@@ -146,7 +145,10 @@ def Downhills(cursor,conn,tablename,samples,bam_handles,genenames,min_sample_siz
 			return 0
 		for pos in UTR3:
 			utr = UTR3[pos]
-			read_counts = m02.Depth_Read_Counts(samples,bamfiles,position)
+			try:
+				read_counts = m02.Depth_Read_Counts(samples,bam_handles,[utr['chr'][3:]]+utr['range_flank'])
+			except:
+				continue
 			if len([x for x in read_counts if x>=10])<min_sample_size:
 				continue
 			datas = m02.Depth_Data2(samples,bam_handles,[utr['chr'][3:]]+utr['range_flank'])
@@ -154,7 +156,7 @@ def Downhills(cursor,conn,tablename,samples,bam_handles,genenames,min_sample_siz
 			downhills = Look_For_Downhills(frames,samples,min_len,0,merge_sep,min_ratio)
 			downhills_c =copy.deepcopy(downhills)
 			APAs = Fit_For_APA_Site(samples,frames,downhills,min_fit_len)
-			Save_APAs_info_to_Database(cursor,conn,tablename,genename,utr,samples,APAs)
+			Save_APAs_info_to_Database(cursor,conn,tablename,genename,frames,utr,samples,APAs)
 		#Plot_APA_Downhills(samples,frames,downhills_c,APAs,points,ymax,rec+genename+'_'+utr['transc']+'.png')
  
 def Downhills_Intermediate(cursor,conn,samples,bam_handles,genename,flanksize,min_len,merge_sep,min_ratio):
