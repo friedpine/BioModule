@@ -135,6 +135,13 @@ def Save_APAs_info_to_Database(cursor,conn,tablename,genename,frames,utr,samples
 			down_right = frames['pos'][APA['pos'][1]]
 			cursor.execute("insert ignore into "+tablename+" values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",[genename,utr['transc'],utr['strand'],sample,utr['chr'],APA_pos,down_left,down_right,APA['depth'][0],APA['depth'][1],APA['area']])
 	conn.commit()
+	
+def APAs_Site_Clustering(cursor,conn,sourcetable,outtable,window_size,min_depth):
+	cursor.execute("select * from "+sourcetable)
+	
+	All_APAs = 
+	
+	
 
 def Downhills(cursor,conn,tablename,samples,bam_handles,genenames,min_sample_size,flanksize,min_len,merge_sep,min_ratio,min_fit_len,points,ymax,rec):
 	for genename in genenames:
