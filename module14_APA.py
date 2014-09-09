@@ -136,11 +136,42 @@ def Save_APAs_info_to_Database(cursor,conn,tablename,genename,frames,utr,samples
 			cursor.execute("insert ignore into "+tablename+" values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",[genename,utr['transc'],utr['strand'],sample,utr['chr'],APA_pos,down_left,down_right,APA['depth'][0],APA['depth'][1],APA['area']])
 	conn.commit()
 	
-def APAs_Site_Clustering(cursor,conn,sourcetable,outtable,window_size,min_depth):
+def APAs_Site_Clustering(cursor,conn,sourcetable,outtable,window_size,min_depth,min_supp):
+	try:
+		cursor.execute("create table "+outtable+"""
+			 (`gene` varchar(50) DEFAULT NULL,
+				`chr` varchar(20) DEFAULT NULL,
+				`strand` varbinary(10) DEFAULT NULL,
+				`pos` int(11) DEFAULT NULL,
+				`sample_count` int(11) DEFAULT NULL
+				) ENGINE=InnoDB DEFAULT CHARSET=latin1""")
+	except:
+		print "EXISTS"
 	cursor.execute("select * from "+sourcetable)
-	
-	All_APAs = 
-	
+	All_sites = cursor.fetchall()
+	Genes_APAs = {}
+	Genes_infos = {}
+	#Make a small index for each gene
+	for i,info in enumerate(All_sites):
+		gene = info[0]
+		if info[10]>=min_depth:
+			if gene not in Genes_APAs:
+				Genes_APAs[gene] = []
+				Genes_infos[gene] = [info[4],info[2]]
+			Genes_APAs[gene].append(i)
+	outs = []
+	for gene in Genes_APAs:
+		ids = Genes_APAs[gene]
+		if len(ids) < min_supp:
+			continue
+		poses = [All_sites[x][5] for x in ids]
+		pos_clusters = clustering_by_windowSize(poses,window_size)
+		for cluster in pos_clusters:
+			if len(cluster)>=min_supp:
+				out = [gene]+Genes_infos+[np.median(cluster),len(cluster)]
+			outs.append(out)
+	cursor.executemany("insert into "+outtable+" values(%s,%s,%s,%s,%s)",outs)
+	conn.commit()
 	
 
 def Downhills(cursor,conn,tablename,samples,bam_handles,genenames,min_sample_size,flanksize,min_len,merge_sep,min_ratio,min_fit_len,points,ymax,rec):
