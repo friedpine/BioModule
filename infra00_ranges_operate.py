@@ -70,12 +70,11 @@ def merge_ranges(ranges,gap):
 	return [i for i in ranges if i != [0,0]]
 
 def clustering_by_windowSize(poses,windowsize):
+	poses = sorted(poses)
 	cluster_1=[sum([1 for pos in poses if pos<=x+windowsize and pos>=x]) for x in poses]
-	print cluster_1
 	if cluster_1 == [] or max(cluster_1) == 1:
 		return [[i] for i in poses]
 	else:
 		cluster_begin = cluster_1.index(max(cluster_1))
 		cluster_end = cluster_1.index(max(cluster_1))+max(cluster_1)
-		print [poses[cluster_begin:cluster_end]]
 		return [poses[cluster_begin:cluster_end]]+clustering_by_windowSize(poses[0:cluster_begin],windowsize)+clustering_by_windowSize(poses[cluster_end:],windowsize)

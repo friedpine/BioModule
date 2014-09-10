@@ -1,6 +1,7 @@
 import os,re,sys
 import module02_coverage as m02
 import d01_geneinfo as d01
+import infra00_ranges_operate as in00
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
@@ -165,11 +166,12 @@ def APAs_Site_Clustering(cursor,conn,sourcetable,outtable,window_size,min_depth,
 		if len(ids) < min_supp:
 			continue
 		poses = [All_sites[x][5] for x in ids]
-		pos_clusters = clustering_by_windowSize(poses,window_size)
+		pos_clusters = in00.clustering_by_windowSize(poses,window_size)
+		print  pos_clusters
 		for cluster in pos_clusters:
 			if len(cluster)>=min_supp:
-				out = [gene]+Genes_infos+[np.median(cluster),len(cluster)]
-			outs.append(out)
+				out = [gene]+Genes_infos[gene]+[int(np.median(cluster)),len(cluster)]
+				outs.append(out)
 	cursor.executemany("insert into "+outtable+" values(%s,%s,%s,%s,%s)",outs)
 	conn.commit()
 	
