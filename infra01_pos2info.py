@@ -39,18 +39,11 @@ class mmap_fasta(object):
 
 def reverse_complementary(seq):
 	rc = ''
+	reverse = {'A':'T','T':'A','G':'C','C':'G','N':'N'}
 	for i in seq:
-		if i == 'A':
-			rc=rc+'T'
-		elif i == 'T':
-			rc=rc+'A'
-		elif i == 'C':
-			rc=rc+'G'
-		elif i == 'G':
-			rc=rc+'C'
-		else:
-			rc=rc+i
+		rc=rc+reverse[i]
 	return rc[::-1]
+
 def get_sequenecs_from_genome(species,ranges):
 	genome = ref[species]['fa']['genome']
 	exon_fa = 'temp_get_sequence.fa'
@@ -74,6 +67,7 @@ def get_sequenecs_from_genome(species,ranges):
 		elif ranges[destination_name]['strand'] == 'neg':
 			ranges[destination_name]['seq'] = reverse_complementary(line[:-1].upper())
 	return ranges
+
 def get_sequenecs_from_genome_s(species,ranges):
 	genome = ref[species]['fa']['genome']
 	exon_fa = '/tmp/temp_get_sequence.fa'
@@ -98,151 +92,16 @@ def get_sequenecs_from_genome_s(species,ranges):
 		elif ranges[destination_name][1] == '-':
 			out[destination_name] = reverse_complementary(line[:-1].upper())
 	return out
+
 def get_seq_mm_mmap(chr,start,end):
 	f = mmap_fasta("/data/Analysis/fanxiaoying/database/mm10/01.bowtie/"+chr+'.fa')
 	return f.getseq(start-1,end)
+
 def get_seq_hg_mmap(chr,start,end):
 	f = mmap_fasta("/data/Analysis/fanxiaoying/database/hg19/00.genome/"+chr+'.fa')
 	return f.getseq(start-1,end).upper()
 
-def get_infos(db1,db2,poses):
-    for chr in poses:
-        for pos in poses[chr]:        
-            for type in ['exon','intron']:
-                poses[chr][pos][type] = {}
-                poses[chr][pos][type]['raw'] = []
-                poses[chr][pos][type]['transc'] = []
-                poses[chr][pos][type]['genes'] = []
-                index = type+'_index'
-                info = type+'_info'
-                pos_M = int(pos/1000000)
-		if pos_M not in db2[index][chr]:
-			continue
-                for left in db2[index][chr][pos_M]:
-                    for right in db2[index][chr][pos_M][left]:
-                        if pos <= right and pos >= left:
-                            temp = copy.deepcopy(db2[info][chr][left][right])
-                            temp['Range_left'] = left
-                            temp['Range_right'] = right
-                            del temp['seq']
-                            poses[chr][pos][type]['raw'].append(temp)
-                            for trans_info in temp['trans']:
-                                transc = re.split('#',trans_info)[0]
-                                gene = db1['ref']['t'][transc]
-                                if transc not in poses[chr][pos][type]['transc']:
-                                    poses[chr][pos][type]['transc'].append(transc)
-                                if gene not in poses[chr][pos][type]['genes']:
-                                    poses[chr][pos][type]['genes'].append(gene)
-                            temp = {}
-def get_exons_sequences(db,NM,exon_indexs):
-	out = {}
-	info = db['transc_info'][NM]
-	chr = info['chr']
-	strand = info['strand']
-	counts = info['count']
-	exons_pos = info['exons_pos']
-	if strand == '+':
-		for index in exon_indexs:
-			id = index
-			out[index]=db['exon_info'][chr][exons_pos[2*id-2]][exons_pos[2*id-1]]['seq'].upper()
-	if strand == '-':
-		for index in exon_indexs:
-			id = counts+1-index
-			out[index]=reverse_complementary(db['exon_info'][chr][exons_pos[2*id-2]][exons_pos[2*id-1]]['seq'].upper())
-	return out
-def db_get_introns_sequences(refdb,transc,indexes):
-	print "hehe"
 
-def get_introns_sequences(db,species,NM,intron_indexs):
-	ranges = {}
-	info = db['transc_info'][NM]
-	chr = info['chr']
-        strand = info['strand']
-        counts = info['count']
-        exons_pos = info['exons_pos']
-	out = {}
-	if strand == '+':
-		for index in intron_indexs:
-			id = index
-			positions = chr+':'+str(exons_pos[2*id-1]+1)+'-'+str(exons_pos[2*id]-1)
-			ranges[positions] = {}
-			ranges[positions]['chr'] = chr
-			ranges[positions]['left'] = exons_pos[2*id-1]+1
-			ranges[positions]['right'] = exons_pos[2*id]-1
-			ranges[positions]['strand'] = 'pos'
-			ranges[positions]['seq'] = ''
-			out[index] = positions
-	if strand == '-':
-		for index in intron_indexs:
-			id = counts-index
-			print exons_pos,index,id
-			positions = chr+':'+str(exons_pos[2*id-1]+1)+'-'+str(exons_pos[2*id]-1)
-			ranges[positions] = {}
-			ranges[positions]['chr'] = chr
-			ranges[positions]['left'] = exons_pos[2*id-1]+1
-			ranges[positions]['right'] = exons_pos[2*id]-1
-			ranges[positions]['strand'] = 'neg'
-			ranges[positions]['seq'] = ''
-			out[index] = positions
-	range2 =  get_sequenecs_from_genome(species,ranges)
-	for i in out.keys():
-		out[i] = range2[out[i]]['seq']
-	return out
-def get_exons_pos(db,NM,exon_indexs):
-	out = {}
-	info = db['transc_info'][NM]
-        chr = info['chr']
-        strand = info['strand']
-        counts = info['count']
-        exons_pos = info['exons_pos']
-	out['chr'] = chr
-	for index in exon_indexs:
-		if index%1==0:
-			if strand == '+':
-				id = index
-			elif strand == '-':
-				id = counts+1-index
-			out[index]=[exons_pos[2*id-2],exons_pos[2*id-1]]
-		else:
-			idx = int(index)
-			if strand == '+':
-				id = idx
-			if strand == '-':
-				id = counts-idx
-			out[index] = [exons_pos[2*id-1]+1,exons_pos[2*id]-1]
-	return out
-def get_introns_pos(db,NM,indexs):
-	info = db['transc_info'][NM]
-	chr = info['chr']
-        strand = info['strand']
-        counts = info['count']
-        exons_pos = info['exons_pos']
-        out = {}
-	for index_raw in indexs:
-		index = int(index_raw)
-		if strand == '+':
-			id = index
-		if strand == '-':
-			id = counts-index
-		out[index_raw] = [exons_pos[2*id-1]+1,exons_pos[2*id]-1]
-	return out
-def transform_exon_intron_cordinate_to_genome(db,NM,index,ranges):
-	info = db['transc_info'][NM]
-	strand = info['strand']
-	ranges = in0.ranges_regulate(ranges)
-	if index%1==0:
-		start_end = get_exons_pos(db,NM,[index])[index]
-	else:
-		index = int(index)
-		start_end = get_introns_pos(db,NM,[index])[index]
-	out = []
-	if strand == '+':
-		out.append(ranges[0]+start_end[0]-1)
-		out.append(ranges[1]+start_end[0]-1)
-	else:
-		out.append(start_end[1]-ranges[1]+1)
-		out.append(start_end[1]-ranges[0]+1)
-	return out
 def genome_ranges_2_fa_file(species,a_ranges,file,id_prefix):
 	ranges = {}
 	ranges_keys = []
@@ -254,6 +113,7 @@ def genome_ranges_2_fa_file(species,a_ranges,file,id_prefix):
 	for k in ranges_keys:
 		print >>f,">"+k+"\n"+ranges[k]['seq']
 	f.close()
+
 def get_seq_of_range_hg(in1):
 	a = re.split(':|-',in1)
 	print in1,get_seq_hg_mmap(a[0],int(a[1]),int(a[1])+100)

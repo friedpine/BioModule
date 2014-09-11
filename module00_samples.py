@@ -212,7 +212,6 @@ def SUMMARIZE(cursor,conn,samples,intype,folder,para,rec):
 	return cmds
 
 
-
 def w(a,file):
 	f = open(file,'w')
 	for i in a:

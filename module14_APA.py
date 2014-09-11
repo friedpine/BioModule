@@ -118,8 +118,7 @@ def Create_APA_Table(cursor,conn,tablename):
   `down_left_depth` int(11) DEFAULT NULL,
   `down_right_depth` int(11) DEFAULT NULL,
   `mean` int(11) DEFAULT NULL,
-  UNIQUE KEY `u` (`sample`,`chr`,`pos`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1"""
+  UNIQUE KEY `u` (`sample`,`chr`,`pos`)) ENGINE=InnoDB DEFAULT CHARSET=latin1"""
 	try:
 		cursor.execute(sql)	
 	except:
@@ -175,6 +174,7 @@ def APAs_Site_Clustering(cursor,conn,sourcetable,outtable,window_size,min_depth,
 	cursor.executemany("insert into "+outtable+" values(%s,%s,%s,%s,%s)",outs)
 	conn.commit()
 	
+def 
 
 def Downhills(cursor,conn,tablename,samples,bam_handles,genenames,min_sample_size,flanksize,min_len,merge_sep,min_ratio,min_fit_len,points,ymax,rec):
 	for genename in genenames:
