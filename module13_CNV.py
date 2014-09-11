@@ -55,5 +55,3 @@ def GET_BINNED_COUNTS_ALONG_GENOME_Multiple(cursor,conn,samples,bamfile,binsize,
   print up_cmd
   cursor.executemany(up_cmd,counts)
   conn.commit()
- def ZHANGMINGLEI(info):
-    print info
