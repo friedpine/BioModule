@@ -1,12 +1,13 @@
 import os,re,sys
 import module02_coverage as m02
 import d01_geneinfo as d01
+import d02_db_tables as d02
 import infra00_ranges_operate as in00
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import copy
-
+import infra01_pos2info as in1
 
 def Smooth_By_Windows():
   print "SMOOTH"
@@ -175,7 +176,17 @@ def APAs_Site_Clustering(cursor,conn,sourcetable,outtable,window_size,min_depth,
 	conn.commit()
 	
 def APAs_Sites_Flanking_Sequences(cursor,conn,tablename,species,flanksize,colname,colinfo):
-	
+	cursor.execute("select id,chr,pos,strand from "+tablename)
+	APA_sites = cursor.fetchall()
+	poses = []
+	ids = []
+	for site in APA_sites:
+		poses.append([site[1],site[2]-flanksize,site[2]+flanksize,site[3]])
+		ids.append(site[0])
+	seqs = in1.get_multiseqs_mmap(species,poses)	
+	print poses[1:10],ids[1:10],seqs[1:10]
+	d02.append_colume_info_to_tables(cursor,conn,tablename,colname,colinfo,ids,seqs)
+
 
 def Downhills(cursor,conn,tablename,samples,bam_handles,genenames,min_sample_size,flanksize,min_len,merge_sep,min_ratio,min_fit_len,points,ymax,rec):
 	for genename in genenames:
