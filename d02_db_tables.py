@@ -14,4 +14,9 @@ def check_table_colume(cursor,conn,tablename,colume,info):
 		sql = "alter table %s add %s %s;" %(tablename,colume,info)
 		cursor.execute(sql)
 		conn.commit()
-#def build_gene_expression_table(cursor,conn,genes)
+
+def append_colume_info_to_tables(cursor,conn,tablename,colume,info,ids,datas):
+	check_table_colume(cursor,conn,tablename,colume,info)
+	length_table = len(ids)
+	values = [datas[i],ids[i]] for i in range(length_table)]
+	cursor.executemany("update "+tablename+" set "+colume+" = %s where id = %s ",values)

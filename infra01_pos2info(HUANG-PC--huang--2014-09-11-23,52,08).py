@@ -109,11 +109,10 @@ def get_multiseqs_hg_mmap(ranges):
 		f = mmap_fasta("/data/Analysis/fanxiaoying/database/hg19/00.genome/"+chr+'.fa')
 		for id,range in enumerate(ranges):
 			if range[0] == chrs_type:
-				seqs = f.getseq(start-1,end).upper()
-				if range[3] == '-':
-					seqs = reverse_complementary(seqs)
-				outs[id] = seqs
+				
 	return outs
+
+
 
 def genome_ranges_2_fa_file(species,a_ranges,file,id_prefix):
 	ranges = {}

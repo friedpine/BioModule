@@ -174,7 +174,7 @@ def APAs_Site_Clustering(cursor,conn,sourcetable,outtable,window_size,min_depth,
 	cursor.executemany("insert into "+outtable+" values(%s,%s,%s,%s,%s)",outs)
 	conn.commit()
 	
-def 
+def APAs_Sites_
 
 def Downhills(cursor,conn,tablename,samples,bam_handles,genenames,min_sample_size,flanksize,min_len,merge_sep,min_ratio,min_fit_len,points,ymax,rec):
 	for genename in genenames:
