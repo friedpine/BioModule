@@ -9,9 +9,6 @@ import numpy as np
 import copy
 import infra01_pos2info as in1
 
-def Smooth_By_Windows():
-  print "SMOOTH"
-
 def Look_For_Downhills(datas,samples,min_len,min_depth,mergeable_gap,min_ratio):
 	outs = {}
 	for sample in samples:
@@ -187,7 +184,6 @@ def APAs_Sites_Flanking_Sequences(cursor,conn,tablename,species,flanksize,colnam
 	print poses[1:10],ids[1:10],seqs[1:10]
 	d02.append_colume_info_to_tables(cursor,conn,tablename,colname,colinfo,ids,seqs)
 
-
 def Downhills(cursor,conn,tablename,samples,bam_handles,genenames,min_sample_size,flanksize,min_len,merge_sep,min_ratio,min_fit_len,points,ymax,rec):
 	for genename in genenames:
 		UTR3 = d01.mm10_refGene_3UTR(cursor,conn,genename,flanksize)
@@ -222,3 +218,34 @@ def Downhills_Intermediate(cursor,conn,samples,bam_handles,genename,flanksize,mi
 		frames = m02.Depth_Data2_Process_transcript(datas,samples,utr['range_flank'],[],utr['strand'])
 		downhills = Look_For_Downhills(frames,samples,min_len,0,merge_sep,min_ratio)
 		print downhills
+
+#INPUTS: A table of genes using two or more APA sites: gene,chr,strand,APA1(small in size),APA2(large in size)
+#OUTPUTS:A copyed table of the input table but with the detailed 
+def Relative_APA_Site_Usage(cursor,conn,samples,bamhandles,sourcetable,outtable,width):
+	cursor.execute("create table "+outtable+" as select * from "+sourcetable)
+	cursor.execute("select * from "+sourcetable)
+	sites = cursor.fetchall()
+	colnames = ['near_'+x for x in samples]+['dist_'+x for x in samples]
+	coldata = [[] for x in colnames]
+	for site in sites:
+		if site[2] == '+':
+			position_near = [site[1],site[3]-width,site[3]]
+			position_dist = [site[1],site[4]-width,site[4]]
+		if site[2] == '-':
+			position_near = [site[1],site[4],site[4]+width]
+			position_dist = [site[1],site[3],site[3]+width]
+		for index,data in enumerate(m02.Mean_Depth_of_Range(samples,bamfiles,position_near)):
+			coldata[index].append(data)
+		for index,data in enumerate(m02.Mean_Depth_of_Range(samples,bamfiles,position_dist)):
+			coldata[index+len(samples)].append(data)
+	print colnames,coldata
+	#d02.append_colume_info_to_tables(cursor,conn,outtable,colname,colinfo,ids,seqs)
+	
+
+
+
+
+
+
+
+
