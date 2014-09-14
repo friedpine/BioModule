@@ -5,7 +5,7 @@ import infra00_ranges_operate as in0
 import mmap
 sys.path.append('/home/fanxiaoying/lib/lib64/python/Bio')
 sys.path.append('/data/Analysis/fanxiaoying/project/project01_polyA-RNAseq/modules')
-ref = pickle.load(open('/data/Analysis/fanxiaoying/project/project01_polyA-RNAseq/modules/Ref.all.dat'))
+#ref = pickle.load(open('/data/Analysis/fanxiaoying/project/project01_polyA-RNAseq/modules/Ref.all.dat'))
 
 def reverse_complementary(seq):
 	rc = ''
@@ -77,12 +77,12 @@ def get_multiseqs_mmap(species,ranges):
 	chrs_types = list(set(chrs))
 	for chrs_type in chrs_types: 
 		if species == 'hg19':
-			f = mmap_fasta("/data/Analysis/fanxiaoying/database/hg19/00.genome/"+chr+'.fa')
+			f = mmap_fasta("/data/Analysis/fanxiaoying/database/hg19/00.genome/"+chrs_type+'.fa')
 		if species == 'mm10':
-			f = mmap_fasta("/data/Analysis/fanxiaoying/database/mm10/01.bowtie/"+chr+'.fa')
+			f = mmap_fasta("/data/Analysis/fanxiaoying/database/mm10/01.bowtie/"+chrs_type+'.fa')
 		for id,range in enumerate(ranges):
 			if range[0] == chrs_type:
-				seqs = f.getseq(start-1,end).upper()
+				seqs = f.getseq(range[1]-1,range[2]).upper()
 				if range[3] == '-':
 					seqs = reverse_complementary(seqs)
 				outs[id] = seqs

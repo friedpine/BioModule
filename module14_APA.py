@@ -144,7 +144,8 @@ def APAs_Site_Clustering(cursor,conn,sourcetable,outtable,window_size,min_depth,
 				`chr` varchar(20) DEFAULT NULL,
 				`strand` varbinary(10) DEFAULT NULL,
 				`pos` int(11) DEFAULT NULL,
-				`sample_count` int(11) DEFAULT NULL
+				`sample_count` int(11) DEFAULT NULL,
+				`pos_std` int(11) DEFAULT NULL
 				) ENGINE=InnoDB DEFAULT CHARSET=latin1""")
 	except:
 		print "EXISTS"
@@ -170,9 +171,9 @@ def APAs_Site_Clustering(cursor,conn,sourcetable,outtable,window_size,min_depth,
 		print  pos_clusters
 		for cluster in pos_clusters:
 			if len(cluster)>=min_supp:
-				out = [gene]+Genes_infos[gene]+[int(np.median(cluster)),len(cluster)]
+				out = [gene]+Genes_infos[gene]+[int(np.median(cluster)),len(cluster),int(np.std(cluster))]
 				outs.append(out)
-	cursor.executemany("insert into "+outtable+" values(%s,%s,%s,%s,%s)",outs)
+	cursor.executemany("insert into "+outtable+" values(%s,%s,%s,%s,%s,%s)",outs)
 	conn.commit()
 	
 def APAs_Sites_Flanking_Sequences(cursor,conn,tablename,species,flanksize,colname,colinfo):
@@ -184,7 +185,6 @@ def APAs_Sites_Flanking_Sequences(cursor,conn,tablename,species,flanksize,colnam
 		poses.append([site[1],site[2]-flanksize,site[2]+flanksize,site[3]])
 		ids.append(site[0])
 	seqs = in1.get_multiseqs_mmap(species,poses)	
-	print poses[1:10],ids[1:10],seqs[1:10]
 	d02.append_colume_info_to_tables(cursor,conn,tablename,colname,colinfo,ids,seqs)
 
 
