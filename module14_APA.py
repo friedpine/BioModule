@@ -223,7 +223,7 @@ def Downhills_Intermediate(cursor,conn,samples,bam_handles,genename,flanksize,mi
 #INPUTS: A table of genes using two or more APA sites: gene,chr,strand,APA1(small in size),APA2(large in size)
 #OUTPUTS:A copyed table of the input table but with the detailed 
 def Relative_APA_Site_Usage(cursor,conn,samples,bamhandles,sourcetable,outtable,width):
-	cursor.execute("create table "+outtable+" as select * from "+sourcetable)
+	cursor.execute("create table "+outtable+" as select * from "+sourcetable+" limit 1")
 	cursor.execute("select * from "+sourcetable)
 	sites = cursor.fetchall()
 	colnames = ['near_'+x for x in samples]+['dist_'+x for x in samples]
@@ -240,7 +240,7 @@ def Relative_APA_Site_Usage(cursor,conn,samples,bamhandles,sourcetable,outtable,
 		for index,data in enumerate(m02.Mean_Depth_of_Range(samples,bamfiles,position_dist)):
 			coldata[index+len(samples)].append(data)
 	print colnames,coldata
-	#d02.append_colume_info_to_tables(cursor,conn,outtable,colname,colinfo,ids,seqs)
+	d02.append_colume_info_to_tables(cursor,conn,outtable,colname,colinfo,ids,seqs)
 	
 
 
