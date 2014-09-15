@@ -222,7 +222,7 @@ def Downhills_Intermediate(cursor,conn,samples,bam_handles,genename,flanksize,mi
 
 #INPUTS: A table of genes using two or more APA sites: gene,chr,strand,APA1(small in size),APA2(large in size)
 #OUTPUTS:A copyed table of the input table but with the detailed 
-def Relative_APA_Site_Usage(cursor,conn,samples,bamfiles,sourcetable,outtable,width):
+def Relative_APA_Site_Usage(cursor,conn,samples,bamfiles,sourcetable,outtable,width,chr_phase):
 	try:
 		cursor.execute("create table "+outtable+" as select * from "+sourcetable+" limit 10")
 	except:
@@ -233,11 +233,11 @@ def Relative_APA_Site_Usage(cursor,conn,samples,bamfiles,sourcetable,outtable,wi
 	coldata = [[] for x in colnames]
 	for site in sites:
 		if site[2] == '+':
-			position_near = [site[1][3:],site[3]-width,site[3]]
-			position_dist = [site[1][3:],site[4]-width,site[4]]
+			position_near = [site[1][chr_phase:],site[3]-width,site[3]]
+			position_dist = [site[1][chr_phase:],site[4]-width,site[4]]
 		if site[2] == '-':
-			position_near = [site[1][3:],site[4],site[4]+width]
-			position_dist = [site[1][3:],site[3],site[3]+width]
+			position_near = [site[1][chr_phase:],site[4],site[4]+width]
+			position_dist = [site[1][chr_phase:],site[3],site[3]+width]
 		for index,data in enumerate(m02.Depth_Range_Mean(samples,bamfiles,position_near)):
 			coldata[index].append(data)
 		for index,data in enumerate(m02.Depth_Range_Mean(samples,bamfiles,position_dist)):
