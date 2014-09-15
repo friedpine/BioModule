@@ -36,7 +36,7 @@ def Depth_Base_Info(samples,bamfiles,position):
 	return outs
 
 #Returns the mean depth of range!
-def Mean_Depth_Of_Range(samples,bamfiles,position):
+def Depth_Range_Mean(samples,bamfiles,position):
 	outs = []
 	for sampleid,samfile in enumerate(bamfiles):
 		temp = 0

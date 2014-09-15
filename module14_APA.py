@@ -222,22 +222,25 @@ def Downhills_Intermediate(cursor,conn,samples,bam_handles,genename,flanksize,mi
 
 #INPUTS: A table of genes using two or more APA sites: gene,chr,strand,APA1(small in size),APA2(large in size)
 #OUTPUTS:A copyed table of the input table but with the detailed 
-def Relative_APA_Site_Usage(cursor,conn,samples,bamhandles,sourcetable,outtable,width):
-	cursor.execute("create table "+outtable+" as select * from "+sourcetable+" limit 1")
-	cursor.execute("select * from "+sourcetable)
+def Relative_APA_Site_Usage(cursor,conn,samples,bamfiles,sourcetable,outtable,width):
+	try:
+		cursor.execute("create table "+outtable+" as select * from "+sourcetable+" limit 10")
+	except:
+		print "EXISTS"	
+	cursor.execute("select * from "+sourcetable+" limit 10")
 	sites = cursor.fetchall()
 	colnames = ['near_'+x for x in samples]+['dist_'+x for x in samples]
 	coldata = [[] for x in colnames]
 	for site in sites:
 		if site[2] == '+':
-			position_near = [site[1],site[3]-width,site[3]]
-			position_dist = [site[1],site[4]-width,site[4]]
+			position_near = [site[1][3:],site[3]-width,site[3]]
+			position_dist = [site[1][3:],site[4]-width,site[4]]
 		if site[2] == '-':
-			position_near = [site[1],site[4],site[4]+width]
-			position_dist = [site[1],site[3],site[3]+width]
-		for index,data in enumerate(m02.Mean_Depth_of_Range(samples,bamfiles,position_near)):
+			position_near = [site[1][3:],site[4],site[4]+width]
+			position_dist = [site[1][3:],site[3],site[3]+width]
+		for index,data in enumerate(m02.Depth_Range_Mean(samples,bamfiles,position_near)):
 			coldata[index].append(data)
-		for index,data in enumerate(m02.Mean_Depth_of_Range(samples,bamfiles,position_dist)):
+		for index,data in enumerate(m02.Depth_Range_Mean(samples,bamfiles,position_dist)):
 			coldata[index+len(samples)].append(data)
 	print colnames,coldata
 	d02.append_colume_info_to_tables(cursor,conn,outtable,colname,colinfo,ids,seqs)
