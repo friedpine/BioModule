@@ -140,12 +140,15 @@ def Save_APAs_info_to_Database(cursor,conn,tablename,genename,frames,utr,samples
 def APAs_Site_Clustering(cursor,conn,sourcetable,outtable,window_size,min_depth,min_supp):
 	try:
 		cursor.execute("create table "+outtable+"""
-			 (`gene` varchar(50) DEFAULT NULL,
+			 (	`id` int(11) NOT NULL AUTO_INCREMENT,
+				`gene` varchar(50) DEFAULT NULL,
 				`chr` varchar(20) DEFAULT NULL,
-				`strand` varbinary(10) DEFAULT NULL,
+				`strand` varchar(10) DEFAULT NULL,
 				`pos` int(11) DEFAULT NULL,
 				`sample_count` int(11) DEFAULT NULL,
 				`pos_std` int(11) DEFAULT NULL
+				 UNIQUE KEY `gene` (`gene`,`pos`),
+				KEY `id` (`id`)
 				) ENGINE=InnoDB DEFAULT CHARSET=latin1""")
 	except:
 		print "EXISTS"
