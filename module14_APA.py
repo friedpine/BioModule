@@ -141,7 +141,7 @@ def APAs_Site_Clustering(cursor,conn,sourcetable,outtable,window_size,min_depth,
 	try:
 		cursor.execute("create table "+outtable+"""
 			 (	`id` int(11) NOT NULL AUTO_INCREMENT,
-				`gene` varchar(50) DEFAULT NULL,
+			 	`gene` varchar(50) DEFAULT NULL,
 				`chr` varchar(20) DEFAULT NULL,
 				`strand` varchar(10) DEFAULT NULL,
 				`pos` int(11) DEFAULT NULL,
