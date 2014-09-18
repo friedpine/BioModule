@@ -35,6 +35,26 @@ def Depth_Base_Info(samples,bamfiles,position):
 						sites[site] = 1
 		outs[samples[sampleid]] = sites
 	return outs
+	
+#Returns the mean depth of range!
+def Depth_Range_Mean(samples,bamfiles,position):
+	outs = []
+	for sampleid,samfile in enumerate(bamfiles):
+		temp = 0
+		for read in samfile.fetch(position[0],position[1],position[2]):
+			start = read.pos
+			cigars = [x for x in read.cigar if x[0]!=1]
+			poses = [0]*len(cigars)
+			for x in range(1,len(poses)):
+				poses[x] = poses[x-1]+cigars[x-1][1]
+			for id,seg in enumerate(cigars):
+				if seg[0] != 0:
+					continue
+				for site in range(start+poses[id],start+poses[id]+seg[1]):
+					if site <= position[2] and site>=position[1]:
+						temp += 1
+		outs.append(temp/(position[2]-position[1]))
+	return outs
 
 def Depth_Data2(samples,bamfiles,position):
 	outs = {}
