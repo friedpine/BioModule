@@ -187,23 +187,22 @@ def APAs_Sites_Flanking_Sequences(cursor,conn,tablename,species,flanksize,colnam
 	seqs = in1.get_multiseqs_mmap(species,poses)	
 	d02.append_colume_info_to_tables(cursor,conn,tablename,colname,colinfo,ids,seqs)
 
-
-def Downhills(cursor,conn,tablename,samples,bam_handles,genenames,min_sample_size,flanksize,min_len,merge_sep,min_ratio,min_fit_len,points,ymax,rec):
+def Downhills(cursor,conn,tablename,samples,bam_handles,genenames,min_sample_size,flanksize,min_len,merge_sep,min_ratio,min_fit_len,points,ymax,rec,chr_phase):
 	for genename in genenames:
-		UTR3 = d01.mm10_refGene_3UTR(cursor,conn,genename,flanksize)
-		print genename
+		UTR3 = d01.hg19_refGene_3UTR(cursor,conn,genename,flanksize)
+		print genename,UTR3
 		if UTR3 == {}:
 			print "NO TRANSC"
 			return 0
 		for pos in UTR3:
 			utr = UTR3[pos]
 			try:
-				read_counts = m02.Depth_Read_Counts(samples,bam_handles,[utr['chr'][3:]]+utr['range_flank'])
+				read_counts = m02.Depth_Read_Counts(samples,bam_handles,[utr['chr'][chr_phase:]]+utr['range_flank'])
 			except:
 				continue
 			if len([x for x in read_counts if x>=10])<min_sample_size:
 				continue
-			datas = m02.Depth_Data2(samples,bam_handles,[utr['chr'][3:]]+utr['range_flank'])
+			datas = m02.Depth_Data2(samples,bam_handles,[utr['chr'][chr_phase:]]+utr['range_flank'])
 			frames = m02.Depth_Data2_Process_transcript(datas,samples,utr['range_flank'],[],utr['strand'])
 			downhills = Look_For_Downhills(frames,samples,min_len,0,merge_sep,min_ratio)
 			downhills_c =copy.deepcopy(downhills)
