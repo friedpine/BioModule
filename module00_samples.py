@@ -6,7 +6,9 @@ import d00_sample as d00
 import d02_db_tables as d02
 sys.path.append('/home/fanxiaoying/lib/lib64/python/Bio')
 sys.path.append('/data/Analysis/fanxiaoying/project/project01_polyA-RNAseq/modules')
-refall = pickle.load(open('/data/Analysis/fanxiaoying/project/project01_polyA-RNAseq/modules/Ref.all.dat'))
+refall = pickle.load(open('/home/zhangxn/git/BioModule/Ref.all.dat'))
+
+dirname = os.path.dirname(os.path.realpath(__file__))+'/'
 
 def add_files(cmd,file):
 	f = open(file)
@@ -121,8 +123,8 @@ def BWA_SINGLE(cursor,conn,specise,ref,samples,intype,folder,rec):
 		insert = rec+'_'+sample
 		fq = d00.get_sample_file(cursor,sample,intype)
 		path = folder+'/BAM'+insert+'.bam'
-		cmd = 'bash /data/Analysis/fanxiaoying/project/project01_polyA-RNAseq/modules/scripts/BWA.single.sh ' +folder+' '+fq\
-				+' '+refall[specise]['bwa'][ref]+" "+path[:-4]+" "+insert
+		refpath = d00.get_ref(cursor,specise,'bwa',ref)
+		cmd = 'bash '+dirname+'scripts/BWA.single.sh ' +folder+' '+fq+' '+refpath+" "+path[:-4]+" "+insert
 		method = add_files(cmd,"/data/Analysis/fanxiaoying/project/project01_polyA-RNAseq/modules/scripts/BWA.single.sh")
 		cursor.execute("insert ignore into files (sample,type,path,method)values(%s,%s,%s,%s) ",[sample,rec,path,method])
 		cmds.append(cmd)
@@ -151,9 +153,9 @@ def TOPHAT_SINGLE(cursor,conn,specise,ref,samples,intype,report,folder,rec):
 		outdir = folder+'/'+insert
 		bam = d00.get_sample_file(cursor,sample,intype)
 		path = outdir+'/BAM'+insert+'.bam'
-		cmd = 'bash /data/Analysis/fanxiaoying/project/project01_polyA-RNAseq/modules/scripts/TOPHAT.single.sh ' +outdir+' '+bam\
-				+' '+refall[specise]['bowtie2'][ref]+" "+path[:-4]+" "+insert+" "+report
-		method = add_files(cmd,"/data/Analysis/fanxiaoying/project/project01_polyA-RNAseq/modules/scripts/TOPHAT.single.sh")
+		refpath = d00.get_ref(cursor,specise,'bowtie2',ref) 
+		cmd = 'bash '+dirname+'scripts/TOPHAT.single.sh ' +outdir+' '+bam+' '+refpath+" "+path[:-4]+" "+insert+" "+report
+		method = add_files(cmd,dirname+"scripts/TOPHAT.single.sh")
 		cursor.execute("replace into files (sample,type,path,method)values(%s,%s,%s,%s)",[sample,rec,path,method])
 		cmds.append(cmd)
 	conn.commit()
@@ -167,9 +169,9 @@ def TOPHAT_PAIRED(cursor,conn,specise,ref,samples,intype,report,folder,rec):
 		fq1 = d00.get_sample_file(cursor,sample,intype[0])
 		fq2 = d00.get_sample_file(cursor,sample,intype[1])
 		path = outdir+'/BAM'+insert+'.bam'
-		cmd = 'bash /data/Analysis/fanxiaoying/project/project01_polyA-RNAseq/modules/scripts/TOPHAT.pair.sh ' +outdir+' '+fq1+' '+fq2\
-				+' '+refall[specise]['bowtie2'][ref]+" "+path[:-4]+" "+insert+" "+report
-		method = add_files(cmd,"/data/Analysis/fanxiaoying/project/project01_polyA-RNAseq/modules/scripts/TOPHAT.pair.sh")
+		refpath = d00.get_ref(cursor,specise,'bowtie2',ref)
+		cmd = 'bash "+dirname+"scripts/TOPHAT.pair.sh ' +outdir+' '+fq1+' '+fq2+' '+refpath+" "+path[:-4]+" "+insert+" "+report
+		method = add_files(cmd,dirname+"scripts/TOPHAT.pair.sh")
 		cursor.execute("replace into files (sample,type,path,method)values(%s,%s,%s,%s)",[sample,rec,path,method])
 		cmds.append(cmd)
 	conn.commit()

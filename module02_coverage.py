@@ -1,6 +1,7 @@
 from __future__ import division
 import re,os,sys
 import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 import pysam
@@ -33,26 +34,6 @@ def Depth_Base_Info(samples,bamfiles,position):
 					else:
 						sites[site] = 1
 		outs[samples[sampleid]] = sites
-	return outs
-
-#Returns the mean depth of range!
-def Depth_Range_Mean(samples,bamfiles,position):
-	outs = []
-	for sampleid,samfile in enumerate(bamfiles):
-		temp = 0
-		for read in samfile.fetch(position[0],position[1],position[2]):
-			start = read.pos
-			cigars = [x for x in read.cigar if x[0]!=1]
-			poses = [0]*len(cigars)
-			for x in range(1,len(poses)):
-				poses[x] = poses[x-1]+cigars[x-1][1]
-			for id,seg in enumerate(cigars):
-				if seg[0] != 0:
-					continue
-				for site in range(start+poses[id],start+poses[id]+seg[1]):
-					if site <= position[2] and site>=position[1]:
-						temp += 1
-		outs.append(temp/(position[2]-position[1]))
 	return outs
 
 def Depth_Data2(samples,bamfiles,position):
@@ -129,7 +110,7 @@ def Depth_Data2_Process_for_Plot(datas,samples,points,min_segs,whole_range,conce
 	intron_len = total_len-exons_len
 	exons_ratio = max(0.66,float(exons_len)/total_len)
 	sampling_ratio_for_exons = int(exons_len/(exons_ratio*points))+1
-	sampling_ratio_for_introns = int(intron_len/(points-exons_ratio*points))+1
+	sampling_ratio_for_introns = int(intron_len/(points+10-exons_ratio*points))+1
 	print other_ranges,intron_len,exons_len,exons_ratio,sampling_ratio_for_exons,sampling_ratio_for_introns
 	frame_id = []
 	frame_pos = []
