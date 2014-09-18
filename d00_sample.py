@@ -1,6 +1,11 @@
 import MySQLdb as mb
 import re,os
 
+def get_ref(cursor,species,type,fa):
+	cursor.execute("select path from bioinfo.ref where spe=%s and type=%s and fa=%s",([species,type,fa]))
+	return cursor.fetchall()[0][0]
+
+
 def get_path2(cursor,sample,type):
 	cursor.execute("select path from files where sample = %s and type = %s",([sample,type]))
 	return cursor.fetchall()[0][0]

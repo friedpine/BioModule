@@ -1,5 +1,5 @@
-tophat=/data/Analysis/fanxiaoying/software/tophat-2.0.8b.Linux_x86_64/tophat
-PATH=$PATH:/data/Analysis/fanxiaoying/software/bowtie2-2.1.0
+tophat=/WPS/BP/huboqiang/software/tophat-2.0.12.Linux_x86_64/tophat
+PATH=$PATH:/WPS/BP/huboqiang/software/Bowtie/bowtie2-2.1.0:/WPS/BP/huboqiang/software/samtools-0.1.19
 
 outdir=$1
 fq1=$2
