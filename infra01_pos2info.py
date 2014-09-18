@@ -14,54 +14,6 @@ def reverse_complementary(seq):
 		rc=rc+reverse[i]
 	return rc[::-1]
 
-def get_sequenecs_from_genome(species,ranges):
-	genome = ref[species]['fa']['genome']
-	exon_fa = 'temp_get_sequence.fa'
-	bedfile = 'temp_bedfile.bed'
-	file = open(bedfile,'w')
-	names_pos_id = {}
-	for i in ranges.keys():
-		print >>file,ranges[i]['chr']+'\t'+str(ranges[i]['left']-1)+'\t'+str(ranges[i]['right'])
-		names_pos_id[ranges[i]['chr']+':'+str(ranges[i]['left']-1)+'-'+str(ranges[i]['right'])] = i
-	file.close()
-	cmd_bed = "/data/Analysis/fanxiaoying/software/bedtools-2.17.0/bin/fastaFromBed -fi %s -bed %s -fo %s" %(genome,bedfile,exon_fa)
-	subprocess.call(cmd_bed,shell=True)
-	file = open(exon_fa)
-	destination_name = ''
-	for line in file:
-		if re.match('>',line):
-			destination_name = names_pos_id[line[1:-1]]
-			ranges[destination_name]['seq'] = ''
-		elif ranges[destination_name]['strand'] == 'pos':
-			ranges[destination_name]['seq'] = line[:-1].upper()
-		elif ranges[destination_name]['strand'] == 'neg':
-			ranges[destination_name]['seq'] = reverse_complementary(line[:-1].upper())
-	return ranges
-
-def get_sequenecs_from_genome_s(species,ranges):
-	genome = ref[species]['fa']['genome']
-	exon_fa = '/tmp/temp_get_sequence.fa'
-	bedfile = '/tmp/temp_bedfile.bed'
-	file = open(bedfile,'w')
-	names_pos_id = {}
-	for i in ranges:
-		print >>file,ranges[i][0]+'\t'+str(ranges[i][2]-1)+'\t'+str(ranges[i][3])
-		names_pos_id[ranges[i][0]+':'+str(ranges[i][2]-1)+'-'+str(ranges[i][3])] = i
-	file.close()
-	cmd_bed = "/data/Analysis/fanxiaoying/software/bedtools-2.17.0/bin/fastaFromBed -fi %s -bed %s -fo %s" %(genome,bedfile,exon_fa)
-	subprocess.call(cmd_bed,shell=True)
-	file = open(exon_fa)
-	destination_name = ''
-	out = {}
-	for line in file:
-		if re.match('>',line):
-			destination_name = names_pos_id[line[1:-1]]
-			out[destination_name] = ''
-		elif ranges[destination_name][1] == '+':
-			out[destination_name] = line[:-1].upper()
-		elif ranges[destination_name][1] == '-':
-			out[destination_name] = reverse_complementary(line[:-1].upper())
-	return out
 
 def get_seq_mm_mmap(chr,start,end):
 	f = mmap_fasta("/data/Analysis/fanxiaoying/database/mm10/01.bowtie/"+chr+'.fa')
@@ -77,9 +29,9 @@ def get_multiseqs_mmap(species,ranges):
 	chrs_types = list(set(chrs))
 	for chrs_type in chrs_types: 
 		if species == 'hg19':
-			f = mmap_fasta("/data/Analysis/fanxiaoying/database/hg19/00.genome/"+chrs_type+'.fa')
+			f = mmap_fasta("/WPS/BP/yangmingyu/database/chr/"+chrs_type+'.fa')
 		if species == 'mm10':
-			f = mmap_fasta("/data/Analysis/fanxiaoying/database/mm10/01.bowtie/"+chrs_type+'.fa')
+			f = mmap_fasta("/WPS/BP/yangmingyu/database/chr/"+chrs_type+'.fa')
 		for id,range in enumerate(ranges):
 			if range[0] == chrs_type:
 				seqs = f.getseq(range[1]-1,range[2]).upper()
