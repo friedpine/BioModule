@@ -168,7 +168,7 @@ def APAs_Site_Clustering(cursor,conn,sourcetable,outtable,window_size,min_depth,
 			continue
 		poses = [All_sites[x][5] for x in ids]
 		pos_clusters = in00.clustering_by_windowSize(poses,window_size)
-		print  pos_clusters
+		#print  pos_clusters
 		for cluster in pos_clusters:
 			if len(cluster)>=min_supp:
 				out = [gene]+Genes_infos[gene]+[int(np.median(cluster)),len(cluster),int(np.std(cluster))]
