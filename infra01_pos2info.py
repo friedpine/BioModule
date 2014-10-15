@@ -7,6 +7,36 @@ sys.path.append('/home/fanxiaoying/lib/lib64/python/Bio')
 sys.path.append('/data/Analysis/fanxiaoying/project/project01_polyA-RNAseq/modules')
 #ref = pickle.load(open('/data/Analysis/fanxiaoying/project/project01_polyA-RNAseq/modules/Ref.all.dat'))
 
+class mmap_fasta(object):
+    def __init__(self,fname):
+        f = file(fname)
+        header = f.readline()
+        row = f.readline()
+
+        self.ofs = len(header)
+        self.lline = len(row)
+        self.ldata = len(row.strip())
+        self.skip = self.lline-self.ldata
+        self.skip_char = row[self.ldata:]
+        #print "SKIP",self.skip,self.skip_char
+        self.mmap = mmap.mmap(f.fileno(),0,prot=mmap.PROT_READ)
+
+    def getseq(self,start,end):
+        l_start = start / self.ldata
+        l_end = end / self.ldata
+        #print "lines",l_start,l_end
+        ofs_start = l_start * self.skip + start + self.ofs
+        ofs_end = l_end * self.skip + end + self.ofs
+        #print "ofs",ofs_start,ofs_end
+        
+        s = self.mmap[ofs_start:ofs_end].replace(self.skip_char,"")
+        L = end-start
+        if len(s) == L:
+            return s
+        else:
+            return s+"N"*(L-len(s))
+        return 
+
 def reverse_complementary(seq):
 	rc = ''
 	reverse = {'A':'T','T':'A','G':'C','C':'G','N':'N'}

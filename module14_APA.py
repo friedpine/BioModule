@@ -243,6 +243,7 @@ def Relative_APA_Site_Usage(cursor,conn,samples,bamfiles,sourcetable,outtable,wi
 		if site[2] == '-':
 			position_near = [site[1][chr_phase:],site[4],site[4]+width]
 			position_dist = [site[1][chr_phase:],site[3],site[3]+width]
+		print position_near,position_dist
 		for index,data in enumerate(m02.Depth_Range_Mean(samples,bamfiles,position_near)):
 			coldata[index].append(data)
 		for index,data in enumerate(m02.Depth_Range_Mean(samples,bamfiles,position_dist)):
