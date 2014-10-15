@@ -5,7 +5,10 @@ import cPickle as pickle
 import infra01_pos2info as in1
 import MySQLdb as mb
 import d00_sample as d00
+import module00_samples as m00
 
+def TEST():
+	print "TEST"
 
 def read_VCF_file(cursor1,SAMPLE_IN,type,DB_NAME,tablename,limit,counts,samples):
 	conn=mb.connect(host="localhost",user="root",passwd="123456",db=DB_NAME)
@@ -21,6 +24,7 @@ def read_VCF_file(cursor1,SAMPLE_IN,type,DB_NAME,tablename,limit,counts,samples)
 	  `Alt` varchar(30) NOT NULL DEFAULT '',
 	  `Qual` float DEFAULT NULL,
 	  `DP` int(11) DEFAULT NULL,
+	  `DP_alt` int(11) DEFAULT NULL,
 	  `FQ` float DEFAULT NULL,
 	  `AF1` float DEFAULT NULL,
 	  `AC1` float DEFAULT NULL,
@@ -50,14 +54,19 @@ def read_VCF_file(cursor1,SAMPLE_IN,type,DB_NAME,tablename,limit,counts,samples)
 		if len(t[4])>limit:
 			t[4]=t[4][0:limit]
 			continue
-		value = (t[0],t[1],t[3],t[4],t[5],info['DP'],info['FQ'],info['AF1'],info['AC1'])
+		if "DP4" in info:
+			DP4 = sum([int(i) for i in re.split(",",info['DP4'])][2:4])		
+		else:
+			DP4=0
+		value = (t[0],t[1],t[3],t[4],t[5],info['DP'],DP4,info['FQ'],info['AF1'],info['AC1'])
 		for i in range(counts):
 			value += tuple(re.split(':|,',t[9+i]))
-		if len(value)!=9+counts*6:
+		if len(value)!=10+counts*6:
 			a = 10
 		else:
 			values.append(value)
-	cmd = "insert into "+tablename+" values(%s"+",%s"*(8+counts*6)+")"
+	cmd = "insert into "+tablename+" values(%s"+",%s"*(9+counts*6)+")"
+	print len(values)
 	cursor.executemany(cmd,values);
 	conn.commit()
 	cursor.close()
@@ -111,66 +120,17 @@ def read_VCF_file_single(cursor,conn,DB_NAME,tablename,samples,type):
 		conn.commit()
 	cursor.close()
 	conn.close()
-class SNP(dict):
-	def __init__(self):
-		print "SNP class welcomes you!"
-	# def read_VCF_file(self,path,sample_names):
-	# 	self['samples'] = sample_names
-	# 	file = open(path)
-	# 	values = []
-	# 	for line in file:
-	# 		if re.search('#',line):
-	# 			continue
-	# 		t = re.split('\s*',line)
-	# 		info = re.split(t[7]
-	def find_good_quality_SNP_pos(self,group,names,goodsize,QUAL_off,GQ_off,rec):
-		self['groupnames'] = names
-		self[rec] = {}
-		indexs = []
-		for i in range(len(names)):
-			temp = []
-			for j in range(len(group)):
-				if group[j] == i:
-					temp.append(j)
-			indexs.append(temp)	
-		for chr in self['chrs']:
-			for pos in self[chr]:
-				if self[chr][pos]['QUAL'] < QUAL_off:
-					continue 
-				self[chr][pos]['group_GT'] = ['NA','NA']
-				for groupid,i in enumerate(indexs):
-					types = []
-					number = 0
-					for j in i:
-						if self[chr][pos]['GQ'][j] >= GQ_off:
-							types.append(self[chr][pos]['GT'][j])
-					counts = dict([(i, types.count(i)) for i in types])
-					GroupType = 'NA'
-					for gt in counts:
-						if counts[gt] >= goodsize[groupid]:
-							GroupType = gt
-					self[chr][pos]['group_GT'][groupid] = GroupType
-				if 'NA' not in self[chr][pos]['group_GT']:
-					counts = dict([(i, types.count(i)) for i in self[chr][pos]['group_GT']])
-					if len(counts) == 2:
-						if chr not in self[rec]:
-							self[rec][chr] = {}
-						self[rec][chr][pos] = {}
-						self[rec][chr][pos]['GT'] = self[chr][pos]['group_GT']
-						self[rec][chr][pos]['ref'] = self[chr][pos]['ref']
-						self[rec][chr][pos]['alt'] = self[chr][pos]['alt']
-	def get_pos_infos(self,rec,db1,db2):
-		poses = copy.deepcopy(self[rec])
-		in1.get_infos(db1,db2,poses)
-		self[rec] = poses
-	def select_target_genes(self,rec,type,genetypes,file):
-		outfile = open(file,'w')
-		for chr in self[rec]:
-			for pos in self[rec][chr]:
-				temp = self[rec][chr][pos]
-				if self[rec][chr][pos][type]['raw'] == []:
-					continue
-				if self[rec][chr][pos]['GT'] not in genetypes:
-					continue
-				print >>outfile,chr,pos,temp['ref'],temp['alt'],temp[type]['genes'][0],temp[type]['transc'][0]
-		outfile.close()	
+
+def Group_Samples_VCF_from_Bam_rmd(cursor,conn,samples,group_name,file_type,SNV_type,SNV_process_type,outdir,cmd_file):
+	m00.FILES_GROUPER(cursor,conn,samples,group_name,file_type,' ')
+	w1 = m00.COMMAND_generator(cursor,conn,[group_name],"samtools mpileup -Duf /data/Analysis/fanxiaoying/database/hg19/00.genome/genome.fa #0 | /data/Analysis/fanxiaoying/software/samtools-0.1.19/bcftools/bcftools view -bvcg -> #1",[file_type],outdir,'.bcf',SNV_type)
+	w2 = m00.COMMAND_generator(cursor,conn,[group_name],"/data/Analysis/fanxiaoying/software/samtools-0.1.19/bcftools/bcftools view #0 | perl /data/Analysis/fanxiaoying/project/project01_polyA-RNAseq/modules/scripts/vcfutils.pl varFilter -d 5 >#1",[SNV_type],outdir,'.vcf',SNV_process_type)
+	m00.w(w1+w2,cmd_file)
+	
+def Single_Sample_SNV_FILE(cursor,conn,sample,fq_type,bam_type,bam_type_rmd,SNV_type,SNV_process_type,outdir,cmd_file):
+	map_cmd = m00.BWA_PAIRED(cursor,conn,"hg19","genome",[sample],fq_type,outdir,bam_type)
+	rmdup = m00.COMMAND_generator(cursor,conn,[sample],"samtools rmdup -S #0 #1",[bam_type],outdir,'.bam',bam_type_rmd)
+	mpileup = m00.COMMAND_generator(cursor,conn,[sample],"samtools mpileup -Duf /data/Analysis/fanxiaoying/database/hg19/00.genome/genome.fa #0 | /data/Analysis/fanxiaoying/software/samtools-0.1.19/bcftools/bcftools view -bvcg -> #1",[bam_type_rmd],outdir,'.bcf',SNV_type)
+	process = m00.COMMAND_generator(cursor,conn,[sample],"/data/Analysis/fanxiaoying/software/samtools-0.1.19/bcftools/bcftools view #0 | perl /data/Analysis/fanxiaoying/project/project01_polyA-RNAseq/modules/scripts/vcfutils.pl varFilter -d 5 >#1",[SNV_type],outdir,'.vcf',SNV_process_type)
+	m00.w(map_cmd+rmdup+mpileup+process,cmd_file)
+	

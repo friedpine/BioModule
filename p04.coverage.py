@@ -38,3 +38,6 @@ for i in t['S01']['bin']:
 for i in t['S01']['bin_std']:
         print >>f,"std",i
 f.close
+
+
+#20140824 Today is my birthday! I am now 24 years old! How time flies!

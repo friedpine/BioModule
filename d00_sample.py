@@ -1,9 +1,25 @@
 import MySQLdb as mb
+import re,os
+
+def get_path2(cursor,sample,type):
+	cursor.execute("select path from files where sample = %s and type = %s",([sample,type]))
+	return cursor.fetchall()[0][0]
+
 def get_path(dbname,sample,type):
 	conn=mb.connect(host="localhost",user="root",passwd="123456",db=dbname)
 	cursor = conn.cursor()
 	cursor.execute("select path from files where sample = %s and type = %s",([sample,type]))
 	return cursor.fetchall()[0][0]
+	
+def samplename_transformer(cursor,conn,in_type,out_type,sample_name):
+	try:
+		cursor.execute("select "+out_type+" from samples where "+in_type+" = %s",([sample_name]))
+		name = cursor.fetchall()[0][0]
+	except:
+		print "NO",out_type,"for",in_type,sample_name
+		name = "NA_"+sample_name
+	return name
+	
 def cp_move_files(pathes,operation,rec):
 	if operation == 'cp':
 		for i in pathes:
@@ -11,6 +27,7 @@ def cp_move_files(pathes,operation,rec):
 	if operation == 'mv':
 		for i in pathes:
 			subprocess.call("mv "+i[0]+" "+i[1],shell='True')
+
 def cufflinks_command(dbname,samples,bamrec,outrec,outdirrec,gtf):
 	conn=mb.connect(host="localhost",user="root",passwd="123456",db=dbname)
 	cursor = conn.cursor()
@@ -24,26 +41,41 @@ def cufflinks_command(dbname,samples,bamrec,outrec,outdirrec,gtf):
 		conn.commit()
 		out.append('/data/Analysis/fanxiaoying/software/cufflinks-2.1.1.Linux_x86_64/cufflinks -p 4 -o '+outdir+' -G '+gtf+' '+bam)
 	return out
-def pair_end_insert_size(dbname,samples,bamrec,outdir,outrec):
-	conn=mb.connect(host="localhost",user="root",passwd="123456",db=dbname)
-	cursor = conn.cursor()
+	
+def pairend_insertion_size_estimation(cursor,conn,samples,bamrec,outdir,outname,outrec):
 	out = []
 	for sample in samples:
 		cursor.execute("select path from files where sample = %s and type = %s",([sample,bamrec]))
 		bam = cursor.fetchall()[0][0]
-		outfile = outdir+'/insert_size_'+sample+'.txt'
-		cursor.execute("insert ignore into files values(%s,%s,%s,%s)",([sample,outrec,outfile,8888]))
+		sample_new_name = samplename_transformer(cursor,conn,'sample',outname,sample)
+		outfile = outdir+'/insert_size_'+sample_new_name+'.txt'
+		cursor.execute("insert ignore into files (sample,type,path)values(%s,%s,%s)",([sample,outrec,outfile]))
 		conn.commit()
-		out.append('samtools view -f 2 '+bam+" | awk '{print $9}' > "+outdir+'/insert_size_'+sample+'.txt')
+		out.append('samtools view -f 2 '+bam+" | awk '{print $9}' > "+outfile)
+		if os.path.exists(outfile):
+			f = open(outfile)
+			f1 = f.read()
+			f2 = re.split('\n',f1)
+			import numpy as np
+			mean = np.mean([abs(int(i)) for i in f2[1:len(f2)-10]])
+			std = np.std([abs(int(i)) for i in f2[1:len(f2)-10]])    
+			print sample_new_name,mean,std
+		else:
+			print outfile
 	return out
+	
 def get_sample_file(cursor,sample,type):
 	cursor.execute("select path from files where sample = %s and type = %s",[sample,type])
 	return cursor.fetchall()[0][0]
+	
 def get_sample_info(cursor,sample,type):
 	cursor.execute("select "+type+" from samples where sample = %s",[sample])
 	return cursor.fetchall()[0][0]
-def insert_sample_file(cursor,sample,type,path):
-	cursor.execute("insert into files values(%s,%s,%s,NULL)",[sample,type,path])
+	
+def insert_sample_file(cursor,conn,sample,type,path):
+	cursor.execute("insert ignore into files (sample,type,path,state)values(%s,%s,%s,NULL)",[sample,type,path])
+	conn.commit()
+
 def table_2_dict(cursor,tablename,columes):
 	gt = {}
 	cursor.execute("select %s,%s from %s" %(columes[0],columes[1],tablename))
@@ -51,6 +83,7 @@ def table_2_dict(cursor,tablename,columes):
 	for i in r0:
 		gt[i[0]] = i[1]
 	return gt
+
 def run_pipeline(cmdname,n):
 	import subprocess,time
 	handle = []
