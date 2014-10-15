@@ -4,12 +4,24 @@ sys.path.append('/data/Analysis/fanxiaoying/project/project01_polyA-RNAseq/modul
 import infra01_pos2info as in1
 import MySQLdb as mb
 
-def check_table_colume(cursor,conn,tablename,colume,info):
+
+def check_table_columes(cursor,tablename,columes):
+	cursor.execute("show columns from "+tablename)
+	r0 = cursor.fetchall()
+	lists = [i[0] for i in r0]
+	out = []
+	for colume in columes:
+		if colume not in lists:
+			out.append(colume)
+	return out
+		
+
+def add_table_colume(cursor,conn,tablename,colume,info):
 	cursor.execute("show columns from "+tablename)
 	r0 = cursor.fetchall()
 	lists = [i[0] for i in r0]
 	if colume in lists:
-		print "EXISTS"
+		print "Colume_Already_EXISTS!"
 	else:
 		sql = "alter table %s add %s %s;" %(tablename,colume,info)
 		cursor.execute(sql)
