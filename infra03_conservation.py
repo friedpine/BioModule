@@ -20,6 +20,7 @@ def phastcon_mm10_exon_average(chr,start,end):
 		return round(np.mean(out),2)
 	else:
 		return 0
+
 def repeat_mask_of_genome_ranges(species,ranges):
 	events = ranges.keys()
 	ranges['index'] = {}
@@ -59,6 +60,7 @@ def repeat_mask_of_genome_ranges(species,ranges):
 				#	ranges[event]['repeat'][info[2]] = array
 	del ranges['index']
 	return ranges
+
 def repeat_mask_of_exon_introns(species,db,segs):
 	ranges = {}
 	for event in segs:
@@ -76,6 +78,7 @@ def repeat_mask_of_exon_introns(species,db,segs):
 			for r in segs[event][id]['ranges']:
 				segs[event][id]['phastcon'].append(phastcon_mm10_exon_average(segs[event][id]['chr'],r[0],r[1]))
 	return segs
+
 def simplify_the_repeat_result(repeats,shortNAME):
 	simp = []
 	ranges = []
@@ -89,6 +92,7 @@ def simplify_the_repeat_result(repeats,shortNAME):
 		ranges.append([int(repeats[left][1]),int(repeats[left][2])])
 	a = in0.newfunc_set_count_sort(simp)
 	return a,simp,ranges,chr
+
 def derive_info_to_ranges_arrays(ranges,ids,all_positive):
 	out_all = []
 	for id in ids:
@@ -103,6 +107,7 @@ def derive_info_to_ranges_arrays(ranges,ids,all_positive):
 					out.append([ranges[id]['chr'],'neg',ranges[id]['ranges'][i][0],ranges[id]['ranges'][i][1]])
 		out_all.append(out)
 	return out_all
+
 def derive_info_count_repeat_numbers(arrays,repeat_names):
 	count = 0
 	for a in arrays:
@@ -110,6 +115,7 @@ def derive_info_count_repeat_numbers(arrays,repeat_names):
 			if a[:-1] == n:
 				count += 1
 	return count
+	
 def interactions_of_repeats_between_two_sequences(rep1,rep2,considered_repeats):
 	if rep1 == '' or rep2 == '' or rep1 == 'NA' or rep2 == 'NA':
 		return 0
