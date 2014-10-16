@@ -48,7 +48,7 @@ def blast_introns_sequence(refdb,table_in,dbname,table1,table2,evalue,wordsize):
 			cursor.execute("insert into "+table2+" values(%s,0,0,0,0,0,0,0,0)",[t[0]])
 		conn.commit()
 
-def get_last_junction_reads_counts(cursor,conn,table_events,table_last_junc,table_files):
+def get_last_junction_reads_counts(cursor,conn,table_events,table_last_junc,table_files,file_format):
 	check_col_1 = d02.check_table_columes(cursor,table_events,['id','sample','transc'])
 	if check_col_1 != []:
 		print "THESE_COLUMES_DOSENT_EXISTS"," ".join(check_col_1)
@@ -63,4 +63,5 @@ def get_last_junction_reads_counts(cursor,conn,table_events,table_last_junc,tabl
 		if x[1] not in events_dict:
 			events_dict[x[1]] = []
 		events_dict[x[1]].append()
-	return events_dict
+	samples = events_dict.keys()
+	for sample in samples:
