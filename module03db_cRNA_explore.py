@@ -55,7 +55,12 @@ def get_last_junction_reads_counts(cursor,conn,table_events,table_last_junc,tabl
 	check_col_2 = d02.check_table_columes(cursor,table_events,['transc','chr','left_pos','right_pos'])
 	if check_col_2 != []:
 		print "THESE_COLUMES_DOSENT_EXISTS"," ".join(check_col_2)
-	sql = "select  a.id,a.sample,b.* from "+table_events+"a join "+table_last_junc+" b on a.transc = b.transc"
+	sql = "select  a.id,a.sample,b.chr,b.left_pos,b.right_pos from "+table_events+"a join "+table_last_junc+" b on a.transc = b.transc"
 	cursor.execute(sql)
-	r1 = cursor.fetchall()
-	samples = 
+	events = cursor.fetchall()
+	events_dict = {}
+	for x in events:
+		if x[1] not in events_dict:
+			events_dict[x[1]] = []
+		events_dict[x[1]].append()
+	return events_dict

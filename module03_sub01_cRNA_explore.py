@@ -258,6 +258,6 @@ class circ_explore(m03.cirrna_meth1):
 			print in3.interactions_of_repeats_between_two_sequences(self['event_info'][event][inrec][info['start']+0.5]['str'],self['event_info'][event][inrec][info['end']-0.5]['str'],name_space)
 			print self['event_info'][event][rec2]
 			
-						
+		
 
 
