@@ -3,11 +3,35 @@ import re,os
 
 def get_path2(cursor,sample,type):
 	cursor.execute("select path from files where sample = %s and type = %s",([sample,type]))
-	return cursor.fetchall()[0][0]
+	try:
+		return cursor.fetchall()[0][0]
+	except:
+		return 'NA'
 
 def get_path1(cursor,tablename,sample,filetype):
 	cursor.execute("select path from "+tablename+" where sample = "+sample+" and type = "+filetype
-	return cursor.fetchall()[0][0]
+	try:
+		return cursor.fetchall()[0][0]
+	except:
+		return 'NA'
+
+def check_validness_of_bamfiles(cursor,tablename,samples,filetype):
+	bad_bam = []
+	bad_index = []
+	for sample in samples:
+		bamfile = get_path1(cursor,tablename,sample,filetype)
+		bamindex = bamfile+".bai"
+		if not os.path.exists(bamfile):
+			bad_bam.append(sample)
+		if not os.path.exists(bamindex):
+			bad_index.append(sample)
+	if bad_index==[] and bad_bam==[]:
+		print "Every_bam_and_index_files_exists!"
+		return 1
+	else:
+		print "BAM_files_not_exists ",bad_bam
+		print "INDEX_files_not_exists ",bad_index
+		return 0
 	
 def samplename_transformer(cursor,conn,in_type,out_type,sample_name):
 	try:
@@ -60,13 +84,6 @@ def insert_sample_file(cursor,conn,sample,type,path):
 	cursor.execute("insert ignore into files (sample,type,path,state)values(%s,%s,%s,NULL)",[sample,type,path])
 	conn.commit()
 
-def table_2_dict(cursor,tablename,columes):
-	gt = {}
-	cursor.execute("select %s,%s from %s" %(columes[0],columes[1],tablename))
-	r0 = cursor.fetchall()
-	for i in r0:
-		gt[i[0]] = i[1]
-	return gt
 
 def run_pipeline(cmdname,n):
 	import subprocess,time
