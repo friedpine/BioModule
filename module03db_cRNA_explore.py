@@ -9,6 +9,7 @@ import infra01_pos2info as in1
 import infra02_blast_info_proc as in2
 import infra03_conservation as in3
 import MySQLdb as mb
+import d00_sample as d00
 import d02_db_tables as d02
 
 def random_build_fake_cRNA(refdb,dbname,table1,numbers):
@@ -48,11 +49,11 @@ def blast_introns_sequence(refdb,table_in,dbname,table1,table2,evalue,wordsize):
 			cursor.execute("insert into "+table2+" values(%s,0,0,0,0,0,0,0,0)",[t[0]])
 		conn.commit()
 
-def get_last_junction_reads_counts(cursor,conn,table_events,table_last_junc,table_files):
+def get_last_junction_reads_counts(cursor,conn,table_events,table_last_junc,table_files,filetype):
 	check_col_1 = d02.check_table_columes(cursor,table_events,['id','sample','transc'])
 	if check_col_1 != []:
 		print "THESE_COLUMES_DOSENT_EXISTS"," ".join(check_col_1)
-	check_col_2 = d02.check_table_columes(cursor,table_events,['transc','chr','left_pos','right_pos'])
+	check_col_2 = d02.check_table_columes(cursor,table_last_junc,['transc','chr','left_pos','right_pos'])
 	if check_col_2 != []:
 		print "THESE_COLUMES_DOSENT_EXISTS"," ".join(check_col_2)
 	sql = "select  a.id,a.sample,b.chr,b.left_pos,b.right_pos from "+table_events+" a join "+table_last_junc+" b on a.transc = b.transc"
@@ -63,4 +64,5 @@ def get_last_junction_reads_counts(cursor,conn,table_events,table_last_junc,tabl
 		if x[1] not in events_dict:
 			events_dict[x[1]] = []
 		events_dict[x[1]].append(x)
-	return events_dict
+	samples = events_dict.keys()
+	d00.check_validness_of_bamfiles(cursor,table_files,samples,filetype)
