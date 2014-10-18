@@ -8,9 +8,11 @@ import infra00_ranges_operate as in0
 import infra01_pos2info as in1
 import infra02_blast_info_proc as in2
 import infra03_conservation as in3
+import infra06_bam_handle as in6
 import MySQLdb as mb
 import d00_sample as d00
 import d02_db_tables as d02
+import pysam
 
 def random_build_fake_cRNA(refdb,dbname,table1,numbers):
 	conn=mb.connect(host="localhost",user="root",passwd="123456",db=dbname)
@@ -49,7 +51,7 @@ def blast_introns_sequence(refdb,table_in,dbname,table1,table2,evalue,wordsize):
 			cursor.execute("insert into "+table2+" values(%s,0,0,0,0,0,0,0,0)",[t[0]])
 		conn.commit()
 
-def get_last_junction_reads_counts(cursor,conn,table_events,table_last_junc,table_files,filetype):
+def get_last_junction_reads_counts(cursor,conn,table_events,table_last_junc,table_files,filetype,chr_prefix):
 	check_col_1 = d02.check_table_columes(cursor,table_events,['id','sample','transc'])
 	if check_col_1 != []:
 		print "THESE_COLUMES_DOSENT_EXISTS"," ".join(check_col_1)
@@ -65,4 +67,17 @@ def get_last_junction_reads_counts(cursor,conn,table_events,table_last_junc,tabl
 			events_dict[x[1]] = []
 		events_dict[x[1]].append(x)
 	samples = events_dict.keys()
-	d00.check_validness_of_bamfiles(cursor,table_files,samples,filetype)
+	if not d00.check_validness_of_bamfiles(cursor,table_files,samples,filetype):
+		return 0
+	time = 0
+	for sample in samples:
+		bampath = d00.get_path1(cursor,table_files,sample,filetype)
+		bamfile = pysam.Samfile(bampath,"rb")
+		ids = []
+		data = []
+		for event in events_dict[sample]:
+			counts = in6.get_junction_reads_counts(bamfile,event[2][chr_prefix:],event[3],event[4])
+			data.append(counts)
+			ids.append(event[0])	
+		d02.append_colume_info_to_tables(cursor,conn,table_events,'last_exon_junction','INT',ids,data)
+		print "FINISHED",sample
