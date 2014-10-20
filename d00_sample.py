@@ -16,6 +16,14 @@ def get_path1(cursor,tablename,sample,filetype):
 	except:
 		return 'NA'
 
+def get_ref(cursor,server="TANG",species,format,info):
+	try:
+		cursor.execute("select path from bioinfo.ref where server=%s and species=%s and format=%s and info=%s",([server,species,format,info]))
+		return cursor.fetchall()[0][0]
+	except:
+		print "Failed to get the REF files!"
+		return 0
+
 def check_validness_of_bamfiles(cursor,tablename,samples,filetype):
 	bad_bam = []
 	bad_index = []
@@ -120,4 +128,4 @@ def run_pipeline(cmdname,n):
 					running_count += 1
 					time.sleep(1)
 			if running_count == 0:
-				br
+				break
