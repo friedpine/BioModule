@@ -1,7 +1,6 @@
 import re, sys, os
 import subprocess
 import time
-import cPickle as pickle
 import d00_sample as d00
 import d02_db_tables as d02
 
@@ -12,7 +11,7 @@ def add_files(cmd,file):
 		out+=i
 	return out
 
-def CUFFLINKS(cursor,conn,species,ref,samples,intype,folder,rec):
+def CUFFLINKS(cursor,conn,species,ref,samples,intype,folder,rec,server="TANG"):
 	cmds = []
 	for sample in samples:
 		insert = rec+'_'+sample
@@ -21,7 +20,8 @@ def CUFFLINKS(cursor,conn,species,ref,samples,intype,folder,rec):
 			os.mkdir(outdir)
 		bam = d00.get_sample_file(cursor,sample,intype)
 		path = outdir+'/genes.fpkm_tracking'
-		cmd = '/data/Analysis/fanxiaoying/software/cufflinks_221/cufflinks -o %s -p 6 -G %s %s' %(outdir,refall[species]['gtf'][ref],bam)
+		refpath = d00.get_ref(cursor,species,'gtf',ref,server)
+		cmd = '/data/Analysis/fanxiaoying/software/cufflinks_221/cufflinks -o %s -p 6 -G %s %s' %(outdir,refpath,bam)
 		cursor.execute("replace into files (sample,type,path,method)values(%s,%s,%s,%s)",[sample,rec,path,cmd])
 		cmds.append(cmd)
 	conn.commit()
@@ -106,7 +106,7 @@ def RPKM_DB(cursor,conn,g_t,gene_length,totalreads,samples,intype,insert,tablena
 		cursor.executemany("update "+tablename+" set "+exp+"=%s where gene = %s",values)
 		conn.commit()
 
-def GENECOUNT_DB(cursor,conn,g_t,gene_length,samples,intype,insert,tablename):
+def COUNT_DB(cursor,conn,g_t,gene_length,samples,intype,insert,tablename):
 	sql = 'create table %s select * from %s' %(tablename,gene_length)
 	try:
 		cursor.execute(sql)

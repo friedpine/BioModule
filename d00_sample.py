@@ -1,6 +1,14 @@
 import MySQLdb as mb
 import re,os
 
+def table_2_dict(cursor,tablename,columes):
+	gt = {}
+	cursor.execute("select %s,%s from %s" %(columes[0],columes[1],tablename))
+	r0 = cursor.fetchall()
+	for i in r0:
+		gt[i[0]] = i[1]
+	return gt
+
 def get_path2(cursor,sample,type):
 	cursor.execute("select path from files where sample = %s and type = %s",([sample,type]))
 	try:
@@ -16,7 +24,7 @@ def get_path1(cursor,tablename,sample,filetype):
 	except:
 		return 'NA'
 
-def get_ref(cursor,server="TANG",species,format,info):
+def get_ref(cursor,species,format,info,server="TANG"):
 	try:
 		cursor.execute("select path from bioinfo.ref where server=%s and species=%s and format=%s and info=%s",([server,species,format,info]))
 		return cursor.fetchall()[0][0]

@@ -9,12 +9,12 @@ insert=$5
 
 mkdir $outdir
 $tophat -p 6 --max-multihits 1 -o $outdir $reference $fq1 $fq2
-mv $outdir/accepted_hits.bam $outdir/Accepted_PE_hits.bam
-mv $outdir/unmapped.bam $outdir/unmapped_PE.bam
+#mv $outdir/accepted_hits.bam $outdir/Accepted_PE_hits.bam
+#mv $outdir/unmapped.bam $outdir/unmapped_PE.bam
 perl -e 'print "@RG\tID:PE\tSM:PE\tLB:ga\tPL:Illumina\n@RG\tID:SE\tSM:hs\tLB:ga\tPL:Illumina\n"' > $outdir/rg.txt
-samtools merge -nrh $outdir/rg.txt -f $outdir/temp.bam $outdir/Accepted_PE_hits.bam $outdir/unmapped_PE.bam
+samtools merge -nrh $outdir/rg.txt -f $outdir/temp.bam $outdir/accepted_hits.bam $outdir/unmapped.bam
 samtools sort -n $outdir/temp.bam -@ 6 $bam_PE
-
+rm $outdir/temp.bam
 
 #$tophat -p 6 --max-multihits 1 -o $outdir $reference $fq3
 #mv $outdir/accepted_hits.bam $outdir/Accepted_SE_hits.bam

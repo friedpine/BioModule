@@ -75,7 +75,9 @@ def Insert_lines_Into_table(cursor,conn,tablename,columes,data):
 		return 0
 	columes_joined = ",".join(columes)
 	percent_s = ",".join(["%s"]*len(columes))
-	sqlcmd = "insert ignore into %s (%s)values(%s)" %(tablename,columes_joined,percent_s)
+	sqlcmd = "replace into %s (%s)values(%s)" %(tablename,columes_joined,percent_s)
+	print sqlcmd
+	print data
 	#print sqlcmd
 	cursor.executemany(sqlcmd,data)
 	conn.commit()
