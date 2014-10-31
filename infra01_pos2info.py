@@ -1,9 +1,9 @@
 import re,copy,sys
-import cPickle as pickle
-import subprocess
 import infra00_ranges_operate as in0
-import mmap
-sys.path.append('/home/fanxiaoying/lib/lib64/python/Bio')
+import pysam
+import d00_sample as d00
+#import mmap
+
 
 class mmap_fasta(object):
     def __init__(self,fname):
@@ -67,4 +67,18 @@ def get_seq_of_range_hg(in1):
 	print in1,get_seq_hg_mmap(a[0],int(a[1]),int(a[1])+100)
 	print in1,get_seq_hg_mmap(a[0],int(a[2])-100,int(a[2]))
 
+def get_pos_seqs(cursor,specise,ref,poses,server="TANG"):
+    refpath = d00.get_ref(cursor,specise,'fa',ref,server)
+    ref = pysam.Fastafile(refpath)
+    seqs = []
+    for pos in poses:
+        try:
+            seq = ref.fetch(pos[0],pos[1]-1,pos[2]).upper()
+        except:
+            seq = "NNNN"
+            print "Failed To Get Sequence!"
+        if pos[3] == "-":
+            seq = reverse_complementary(seq)
+        seqs.append(seq)
+    return seqs
 

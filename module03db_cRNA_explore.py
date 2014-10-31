@@ -3,7 +3,6 @@ sys.path.append('/home/fanxiaoying/lib/lib64/python/Bio')
 sys.path.append('/data/Analysis/fanxiaoying/project/project01_polyA-RNAseq/modules')
 import random as rd
 import numpy as np
-#import module03_rna_procerss as m03
 import infra00_ranges_operate as in0
 import infra01_pos2info as in1
 import infra02_blast_info_proc as in2
@@ -27,28 +26,26 @@ def random_build_fake_cRNA(refdb,dbname,table1,numbers):
 	cursor.executemany("insert into "+table1+" (id,transc,ex_left_id,ex_right_id)values(NULL,%s,%s,%s)",values)
 	conn.commit()
 
-def blast_introns_sequence(refdb,table_in,dbname,table1,table2,evalue,wordsize):
-	conn=mb.connect(host="localhost",user="root",passwd="123456",db=dbname)
-	cursor = conn.cursor()
-	cursor.execute("select * from "+table1)
+def blast_introns_sequence(cursor,conn,tablein,table_result,species,ref,evalue,wordsize,cut,folder,server="TANG"):
+	try:
+		cursor.execute('create table '+table_result+" as select * from mm_crna_explore.blast_template")
+	except:
+		print "EXISTS!"
+	cursor.execute("select event,chr,in1_s,in1_e,in2_s,in2_e from "+tablein)
 	r0 = cursor.fetchall()
 	for t in r0:
-		print '###########',t
 		try:
-			ranges = {}
-			cursor.execute("select * from "+refdb+'.'+table_in+" where transc = %s and ex_order = %s ",[t[1],t[2]-1])
-			r1 = cursor.fetchall()[0]
-			ranges['r2'] = [r1[2],'+',r1[4],r1[5]]
-			cursor.execute("select * from "+refdb+'.'+table_in+" where transc = %s and ex_order = %s ",[t[1],t[3]])
-			r1 = cursor.fetchall()[0]
-			ranges['r1'] = [r1[2],'+',r1[4],r1[5]]
-			in2.blast_genome_positions('mm10',ranges,evalue,wordsize,'RC')
-			result = in2.blast_fmt7_out_read_for_db('./temp_blast_r1r2.txt',40,'RC')
-			if result != []:
-				for r2 in result:
-					cursor.execute("insert into "+table2+" values(%s,%s,%s,%s,%s,%s,%s,%s,%s)",[t[0]]+r2)
+			pos_list1 = [[t[1],t[2],t[3],'+']]
+			pos_list2 = [[t[1],t[4],t[5],'+']]
+			list1_name = ['up']
+			list2_name = ['down']
+			record = t[0]
+			values = in2.blast_ref_positions(cursor,species,ref,pos_list1,pos_list2,list1_name,list2_name,evalue,wordsize,cut,folder,record,'RC',server)
 		except:
-			cursor.execute("insert into "+table2+" values(%s,0,0,0,0,0,0,0,0)",[t[0]])
+			print "Failed To Get BLAST Result!"
+			continue
+		print values
+		cursor.executemany("insert into "+table_result+" values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",values)
 		conn.commit()
 
 def get_last_junction_reads_counts(cursor,conn,table_events,table_last_junc,table_files,filetype,chr_prefix):
@@ -81,3 +78,23 @@ def get_last_junction_reads_counts(cursor,conn,table_events,table_last_junc,tabl
 			ids.append(event[0])	
 		d02.append_colume_info_to_tables(cursor,conn,table_events,'last_exon_junction','INT',ids,data)
 		print "FINISHED",sample
+
+def get_sequence_of_splicing_site(cursor,conn,species,intable,outtable):
+	cursor.execute("select event,strand,chr,in1_s,in1_e,in2_s,in2_e from "+intable)
+	infos = cursor.fetchall()
+	d02.Create_Mysql_tables(cursor,conn,outtable,['event','up5','up3','down5','down3'],['varchar(60)','varchar(10)','varchar(10)','varchar(10)','varchar(10)'])
+	out = []
+	for x in infos:
+		line = [x[0]]
+		chr = x[2]
+		strand = x[1]
+		if x[1] == "-":
+			poses = [[chr,x[4]-3,x[4]+4,strand],[chr,x[3]-4,x[3]+3,strand],[chr,x[6]-3,x[6]+4,strand],[chr,x[5]-4,x[5]+3,strand]]
+			line=line+in1.get_pos_seqs(cursor,species,'genome',poses,"TANG")
+		if x[1] == "+":
+			poses = [[chr,x[3]-4,x[3]+3,strand],[chr,x[4]-3,x[4]+4,strand],[chr,x[5]-4,x[5]+3,strand],[chr,x[6]-3,x[6]+4,strand]]
+			line=line+in1.get_pos_seqs(cursor,species,'genome',poses,"TANG")
+		out.append(line)
+	d02.Insert_lines_Into_table(cursor,conn,outtable,['event','up5','up3','down5','down3'],out)
+
+
