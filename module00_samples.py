@@ -136,10 +136,11 @@ def BWA_PAIRED(cursor,conn,specise,ref,samples,intype,folder,rec,server="TANG"):
 		fq1 = d00.get_sample_file(cursor,sample,intype[0])
 		fq2 = d00.get_sample_file(cursor,sample,intype[1])
 		path = folder+'/BAM'+insert+'.bam'
+		(scriptpath,scriptcmds) = d00.get_script(cursor,'bwa_pair',server) 
 		refpath = d00.get_ref(cursor,specise,'bwa',ref,server)
-		cmd = "bash %sscripts/BWA.pair.sh %s %s %s %s %s %s" %(dirname,folder,fq1,fq2,refpath,path[:-4],insert)
-		method = add_files(cmd,dirname+"scripts/BWA.pair.sh")
-		cursor.execute("replace into files (sample,type,path,method)values(%s,%s,%s,%s) ",[sample,rec,path,method])
+		cmd = "bash %s %s %s %s %s %s %s" %(scriptpath,folder,fq1,fq2,refpath,path[:-4],insert)
+		method = cmd+" \n"+scriptcmds
+		cursor.execute("replace into files (sample,type,path,method,server) values(%s,%s,%s,%s,%s) ",[sample,rec,path,method,server])
 		cmds.append(cmd)
 	conn.commit()
 	return cmds
@@ -199,14 +200,15 @@ def Read_BWA_flagstat(cursor,conn,samples,intype,recs):
 		cursor.execute(sql)
 	conn.commit()
 
-def SUMMARIZE(cursor,conn,samples,intype,folder,para,rec):
+def SUMMARIZE(cursor,conn,samples,intype,folder,para,rec,server="TANG"):
 	cmds = []
 	for sample in samples:
 		insert = rec+'_'+sample
 		bam = d00.get_sample_file(cursor,sample,intype)
 		path = folder+'/summarize.'+insert+'.txt'
-		cmd = 'bash /data/Analysis/fanxiaoying/project/project01_polyA-RNAseq/modules/scripts/SUMMARIZE.sh '+bam+' '+path+' '+para
-		cursor.execute("replace into files (sample,type,path,method)values(%s,%s,%s,%s)",[sample,rec,path,cmd])
+		(scriptpath,scriptcmds) = d00.get_script(cursor,'summarize',server)
+		cmd = 'bash %s %s %s %s' %(scriptpath,bam,path,para)
+		cursor.execute("replace into files (sample,type,path,method,server)values(%s,%s,%s,%s,%s)",[sample,rec,path,cmd,server])
 		cmds.append(cmd)
 	conn.commit()
 	return cmds

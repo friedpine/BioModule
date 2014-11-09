@@ -24,6 +24,16 @@ def get_path1(cursor,tablename,sample,filetype):
 	except:
 		return 'NA'
 
+def get_colume_data(cursor,tablename,subjects,querys):
+	sql = "select "+' '.join(subjects)+' from '+tablename+" where "+' and '.join(querys)
+	print sql
+	cursor.execute(sql)
+	try:
+		return cursor.fetchall()[0]
+	except:
+		print "NO SUCH THING!!!"
+		return 'NA'
+
 def get_ref(cursor,species,format,info,server="TANG"):
 	try:
 		cursor.execute("select path from bioinfo.ref where server=%s and species=%s and format=%s and info=%s",([server,species,format,info]))
@@ -31,6 +41,14 @@ def get_ref(cursor,species,format,info,server="TANG"):
 	except:
 		print "Failed to get the REF files!"
 		return 0
+
+def get_script(cursor,type,server="TANG"): 
+    try:
+        cursor.execute("select path,cmds from bioinfo.scripts where server=%s and type=%s",([server,type]))
+        return cursor.fetchall()[0]
+    except: 
+        print "Failed to get the SCRIPT files!"
+        return 0
 
 def check_validness_of_bamfiles(cursor,tablename,samples,filetype):
 	bad_bam = []
@@ -65,29 +83,7 @@ def cp_move_files(pathes,operation,rec):
 			subprocess.call("cp "+i[0]+" "+i[1],shell='True')
 	if operation == 'mv':
 		for i in pathes:
-			subprocess.call("mv "+i[0]+" "+i[1],shell='True')
-	
-def pairend_insertion_size_estimation(cursor,conn,samples,bamrec,outdir,outname,outrec):
-	out = []
-	for sample in samples:
-		cursor.execute("select path from files where sample = %s and type = %s",([sample,bamrec]))
-		bam = cursor.fetchall()[0][0]
-		sample_new_name = samplename_transformer(cursor,conn,'sample',outname,sample)
-		outfile = outdir+'/insert_size_'+sample_new_name+'.txt'
-		cursor.execute("insert ignore into files (sample,type,path)values(%s,%s,%s)",([sample,outrec,outfile]))
-		conn.commit()
-		out.append('samtools view -f 2 '+bam+" | awk '{print $9}' > "+outfile)
-		if os.path.exists(outfile):
-			f = open(outfile)
-			f1 = f.read()
-			f2 = re.split('\n',f1)
-			import numpy as np
-			mean = np.mean([abs(int(i)) for i in f2[1:len(f2)-10]])
-			std = np.std([abs(int(i)) for i in f2[1:len(f2)-10]])    
-			print sample_new_name,mean,std
-		else:
-			print outfile
-	return out
+			subprocess.call("mv "+i[0]+" "+i[1],shell='True')	
 	
 def get_sample_file(cursor,sample,type):
 	cursor.execute("select path from files where sample = %s and type = %s",[sample,type])
@@ -100,40 +96,3 @@ def get_sample_info(cursor,sample,type):
 def insert_sample_file(cursor,conn,sample,type,path):
 	cursor.execute("insert ignore into files (sample,type,path,state)values(%s,%s,%s,NULL)",[sample,type,path])
 	conn.commit()
-
-
-def run_pipeline(cmdname,n):
-	import subprocess,time
-	handle = []
-	for i in range(0,n):
-		handle.append('PP'+str(i))
-	info = cmdname
-	if len(info)>n:
-		next = n
-		for i in range(0,n):
-			 handle[i]=subprocess.Popen(info[i],shell='True')
-		while 1:
-			running_count = 0
-			for i in range(0,n):
-				if handle[i].poll() is None:
-					print str(i)+" Is RUNNING"
-					running_count += 1
-				elif next < len(info):
-					handle[i] = subprocess.Popen(info[next],shell='True')
-					print str(i)+"NEW_tasks for this handle"
-					next += 1
-				time.sleep(1)
-			if running_count == 0:
-				break
-	else:
-		for i in range(0,len(info)):
-			handle[i]=subprocess.Popen(info[i],shell='True')
-		while 1:
-			running_count = 0
-			for i in range(0,len(info)):
-				if handle[i].poll() is None:
-					print str(i)+" Is RUNNING"
-					running_count += 1
-					time.sleep(1)
-			if running_count == 0:
-				break
