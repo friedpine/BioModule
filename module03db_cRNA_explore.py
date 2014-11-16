@@ -80,9 +80,9 @@ def get_last_junction_reads_counts(cursor,conn,table_events,table_last_junc,tabl
 		print "FINISHED",sample
 
 def get_sequence_of_splicing_site(cursor,conn,species,intable,outtable):
-	cursor.execute("select event,strand,chr,in1_s,in1_e,in2_s,in2_e from "+intable)
+	cursor.execute("select event,strand,chr,in1_s,in1_e,in2_s,in2_e from "+intable+" WHERE in1_s IS NOT NULL AND in2_s IS NOT NULL")
 	infos = cursor.fetchall()
-	d02.Create_Mysql_tables(cursor,conn,outtable,['event','up5','up3','down5','down3'],['varchar(60)','varchar(10)','varchar(10)','varchar(10)','varchar(10)'])
+	d02.Create_Mysql_tables(cursor,conn,outtable,['event','up5','up3','down5','down3'],['varchar(100)','varchar(10)','varchar(10)','varchar(10)','varchar(10)'])
 	out = []
 	for x in infos:
 		line = [x[0]]

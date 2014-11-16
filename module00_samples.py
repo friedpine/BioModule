@@ -103,9 +103,10 @@ def BOWTIE_PAIRED(cursor,conn,samples,species,ref,ins,outdir,usage,rec,server="T
 		fq1 = d00.get_sample_file(cursor,sample,ins[0])
 		fq2 = d00.get_sample_file(cursor,sample,ins[1])
 		refpath = d00.get_ref(cursor,species,'bowtie2',ref,server)
-		cmd = 'bash %sscripts/BOWTIE.pair.sh %s %s %s %s %s' %(dirname,fq1,fq2,path[:-4],refpath,usage)
-		method = add_files(cmd,dirname+"scripts/BOWTIE.pair.sh")
-		cursor.execute("replace into files (sample,type,path,method)values(%s,%s,%s,%s)",[sample,rec,path,method])
+		(scriptpath,scriptcmds) = d00.get_script(cursor,'bowtie_pair',server)
+		cmd = 'bash %s %s %s %s %s %s' %(scriptpath,fq1,fq2,path[:-4],refpath,usage)
+		method = cmd+" \n"+scriptcmds
+		cursor.execute("replace into files (sample,type,path,method,server)values(%s,%s,%s,%s,%s)",[sample,rec,path,method,server])
 		conn.commit()
 		if not os.path.exists(path):
 			cmds.append(cmd)
