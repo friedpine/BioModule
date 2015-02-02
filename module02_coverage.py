@@ -14,26 +14,39 @@ def Depth_Read_Counts(samples,bamfiles,position):
 		outs.append(samfile.count(position[0],position[1],position[2]))
 	return outs
 
-def Depth_Base_Info(samples,bamfiles,position):
-	outs = {}
-	for sampleid,samfile in enumerate(bamfiles):
-		sites = {}
-		for read in samfile.fetch(position[0],position[1],position[2]):
-			start = read.pos
-			cigars = [x for x in read.cigar if x[0]!=1]
-			poses = [0]*len(cigars)
-			for x in range(1,len(poses)):
-				poses[x] = poses[x-1]+cigars[x-1][1]
-			for id,seg in enumerate(cigars):
-				if seg[0] != 0:
-					continue
-				for site in range(start+poses[id],start+poses[id]+seg[1]):
-					if site in sites:
-						sites[site] += 1
-					else:
-						sites[site] = 1
-		outs[samples[sampleid]] = sites
-	return outs
+def DepthHash2Ranges(samples,data,min_length,min_depth):
+	out = {}
+	for sample in samples:
+		print sample
+		ranges = []
+		sorted_keys = sorted(data[sample].keys())
+		start = sorted_keys[0]
+		end = sorted_keys[-1]
+		temp = ['0']*(end-start+1)
+		for x in sorted_keys:
+			pos_count = 0
+			total_depth = 0
+			for base in range(x-9,x+1):
+				if base in sorted_keys and data[sample][base]>=0.5*min_depth:
+					pos_count += 1
+					total_depth += data[sample][base]
+			if pos_count>=5 and total_depth>=10*min_depth:
+				temp[x-start] = '1'
+				continue
+			pos_count = 0
+			total_depth = 0
+			for base in range(x,x+10):
+				if base in sorted_keys and data[sample][base]>=0.5*min_depth:
+					pos_count += 1
+					total_depth += data[sample][base]
+			if pos_count>=5 and total_depth>=10*min_depth:
+				temp[x-start] = '1'
+		strs  = "".join(temp)
+		for m in re.finditer('1{1,}',strs):
+			if m.end()-m.start()>min_length:
+				ranges.append([m.start()+start,m.end()+start])
+		out[sample] = ranges
+	return out
 
 #Returns the mean depth of range!
 def Depth_Range_Mean(samples,bamfiles,position):
@@ -114,7 +127,6 @@ def Look_For_Downhills(datas,samples,min_len,min_depth,min_seq):
 		down_hills_sep.append(down_hills[-1])
 		for i in down_hills_sep:
 			print sample,i        
-
 	
 def Depth_Data2_Process_for_Plot(datas,samples,points,min_segs,whole_range,concern_ranges):
 	out = {}

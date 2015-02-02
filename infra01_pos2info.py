@@ -2,7 +2,7 @@ import re,copy,sys
 import infra00_ranges_operate as in0
 import pysam
 import d00_sample as d00
-#import mmap
+import mmap
 
 
 class mmap_fasta(object):
